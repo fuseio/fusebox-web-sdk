@@ -201,43 +201,4 @@ export class ContractUtils {
       )
     );
   }
-
-  /**
-   * Signs an off-chain transaction using the provided credentials and transaction data.
-   * @param credentials are the Ethereum private key credentials.
-   * @param from is the address of the sender.
-   * @param to is the address of the recipient.
-   * @param data is the data to be sent with the transaction.
-   * @param nonce is the nonce of the transaction.
-   * @param value is the amount of Ether to be sent with the transaction.
-   * @param gasLimit is the gas limit of the transaction.
-   * @param gasPrice is the gas price of the transaction.
-   * @returns a hex string representing the signed transaction.
-   */
-  public static signOffChain(
-    credentials: ethers.Signer,
-    from: string,
-    to: string,
-    data: string,
-    nonce: string,
-    value?: ethers.BigNumberish,
-    gasLimit?: ethers.BigNumberish,
-    gasPrice?: ethers.BigNumberish
-  ) {
-    const inputArray = [
-      '0x19',
-      '0x00',
-      from,
-      to,
-      hexZeroPad(hexlify(value ?? BigInt(0)), 32),
-      data,
-      nonce,
-      hexZeroPad(hexlify(gasPrice ?? BigInt(0)), 32),
-      hexZeroPad(hexlify(gasLimit ?? BigInt(Variables.DEFAULT_GAS_LIMIT)), 32),
-    ];
-    const input = '0x' + inputArray.map((hexStr) => hexStr.toString().substring(2)).join('');
-    const messagePayload = keccak256(hexToBytes(input));
-    const signature = credentials.signMessage(messagePayload);
-    return signature;
-  }
 }

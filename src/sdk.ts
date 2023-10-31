@@ -11,15 +11,10 @@ import {
 import { EtherspotWallet } from './etherspot';
 import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 import { SmartWalletAuth } from './utils/auth';
-import { TxOptions } from './types/transaction_options/transaction_options';
 import { ContractUtils } from './utils/contracts';
 import { rethrowError } from '@etherspot/prime-sdk/dist/sdk/common';
 import { Variables } from './constants/variables';
-import { StakingModule } from './modules/staking';
-import { IStakeRequestBody } from './types/staking/stake';
 import { ITokenDetails } from './types/token/token_details';
-import { hexToBytes } from 'web3-utils';
-import { IUnstakeRequestBody } from './types/staking/unstake';
 
 export class FuseSDK {
   private readonly _axios: AxiosInstance;
@@ -27,7 +22,6 @@ export class FuseSDK {
   private _jwtToken!: string;
   public wallet!: EtherspotWallet;
   public client!: Client;
-  private _stakingModule!: StakingModule;
 
   constructor(public readonly publicApiKey: string) {
     this._axios = axios.create({
@@ -39,13 +33,6 @@ export class FuseSDK {
         apiKey: publicApiKey,
       },
     });
-    this._initializeModules();
-  }
-
-  public static defaultTxOptions = new TxOptions('1000000', 10, false);
-
-  private _initializeModules(): void {
-    this._stakingModule = new StakingModule(this._axios);
   }
 
   /**
@@ -103,7 +90,7 @@ export class FuseSDK {
     tokenAddress: string,
     recipient: string,
     amount: BigNumberish,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     let call: ICall;
     if (this._isNativeToken(tokenAddress)) {
@@ -135,7 +122,7 @@ export class FuseSDK {
     nftContractAddress: string,
     recipient: string,
     tokenId: BigNumberish,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     const callData = ContractUtils.encodeERC721SafeTransferCall(
       this.wallet.getSender(),
@@ -159,9 +146,9 @@ export class FuseSDK {
    */
   async executeBatch(
     calls: Array<ICall>,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ): Promise<ISendUserOperationResponse | null | undefined> {
-    txOptions = txOptions ?? FuseSDK.defaultTxOptions;
+    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
     const initialFees = BigInt(txOptions.feePerGas);
     this.setWalletFees(initialFees);
 
@@ -199,7 +186,7 @@ export class FuseSDK {
     tokenAddress: string,
     spender: string,
     amount: BigNumberish,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     return await this._executeTokenOperation(
       tokenAddress,
@@ -222,7 +209,7 @@ export class FuseSDK {
     nftContractAddress: string,
     spender: string,
     tokenId: BigNumberish,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     return await this._executeTokenOperation(
       nftContractAddress,
@@ -242,7 +229,7 @@ export class FuseSDK {
    * @param txOptions are the transaction options.
    * @returns
    */
-  async callContract(to: string, value: BigNumberish, data: Uint8Array, txOptions?: TxOptions) {
+  async callContract(to: string, value: BigNumberish, data: Uint8Array, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
     const call: ICall = {
       to: to,
       value: value,
@@ -270,7 +257,7 @@ export class FuseSDK {
     spender: string,
     amount: BigNumberish,
     callData: Uint8Array,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     const approveCallData = ContractUtils.encodeERC20ApproveCall(tokenAddress, spender, amount);
     const calls: Array<ICall> = [
@@ -286,63 +273,6 @@ export class FuseSDK {
       },
     ];
     return await this.executeBatch(calls, txOptions);
-  }
-
-  /**
-   * Stakes tokens based on the provided stakeRequestBody
-   * This method facilitates token staking by interacting with the staking module.
-   *
-   * @param stakeRequestBody contains details about the token staking, such as the token address and amount.
-   * @param options are the transaction options.
-   * @returns
-   */
-  async stakeToken(stakeRequestBody: IStakeRequestBody, options?: TxOptions) {
-    const stakeResponseBody = await this._stakingModule.stake(stakeRequestBody);
-    if (stakeResponseBody instanceof Error) {
-      throw stakeResponseBody;
-    }
-    const tokenDetails = await this.getERC20TokenDetails(stakeRequestBody.tokenAddress);
-    const amount = ethers.utils.parseUnits(stakeRequestBody.tokenAmount, tokenDetails.decimals);
-    const stakeCallData = hexToBytes(stakeResponseBody.encodedABI);
-
-    return await this._processOperation({
-      tokenAddress: stakeRequestBody.tokenAddress,
-      spender: stakeResponseBody.contractAddress,
-      callData: stakeCallData,
-      amount: amount,
-      options,
-    });
-  }
-
-  /**
-   * Unstakes tokens based on the provided unstakeRequestBody.
-   *
-   * This method facilitates token unstaking by interacting with the staking module.
-   * @param unstakeRequestBody contains details about the token unstaking, such as the token address and amount.
-   * @param unStakeTokenAddress is the address of the token to be unstaked.
-   * @param options are the transaction options.
-   * @returns
-   */
-  async unstakeToken(
-    unstakeRequestBody: IUnstakeRequestBody,
-    unStakeTokenAddress: string,
-    options?: TxOptions
-  ) {
-    const unstakeResponseBody = await this._stakingModule.unstake(unstakeRequestBody);
-    if (unstakeResponseBody instanceof Error) {
-      throw unstakeResponseBody;
-    }
-    const tokenDetails = await this.getERC20TokenDetails(unstakeRequestBody.tokenAddress);
-    const amount = ethers.utils.parseUnits(unstakeRequestBody.tokenAmount, tokenDetails.decimals);
-    const unstakeCallData = hexToBytes(unstakeResponseBody.encodedABI);
-
-    return await this._processOperation({
-      tokenAddress: unStakeTokenAddress,
-      spender: unstakeResponseBody.contractAddress,
-      callData: unstakeCallData,
-      amount: amount,
-      options,
-    });
   }
 
   private async _getNativeBalance(address: string): Promise<ethers.BigNumber> {
@@ -525,9 +455,9 @@ export class FuseSDK {
    */
   private async _executeUserOperation(
     call: ICall,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ): Promise<ISendUserOperationResponse | null | undefined> {
-    txOptions = txOptions ?? FuseSDK.defaultTxOptions;
+    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
     const initialFees = BigInt(txOptions.feePerGas);
     this.setWalletFees(initialFees);
     try {
@@ -577,7 +507,7 @@ export class FuseSDK {
     spender: string;
     callData: Uint8Array;
     amount: ethers.BigNumberish;
-    options?: TxOptions;
+    options?: typeof Variables.DEFAULT_TX_OPTIONS;
   }) {
     if (this._isNativeToken(tokenAddress)) {
       return await this._executeUserOperation(
@@ -615,7 +545,7 @@ export class FuseSDK {
     to: string,
     value: ethers.BigNumberish,
     encoder: Function,
-    txOptions?: TxOptions
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     const callData = encoder(contractAddress, to, value);
     const call: ICall = {
