@@ -79,66 +79,6 @@ export class FuseSDK {
   }
 
   /**
-   * Transfers a specified amount of tokens from the user's address to the recipient.
-   * @param tokenAddress Address of the ERC20 token contract.
-   * @param recipient Address of the recipient.
-   * @param amount Amount of tokens to transfer.
-   * @param txOptions are the transaction options.
-   * @returns
-   */
-  async transferToken(
-    tokenAddress: string,
-    recipient: string,
-    amount: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
-  ) {
-    let call: ICall;
-    if (this._isNativeToken(tokenAddress)) {
-      call = {
-        to: recipient,
-        value: amount,
-        data: Uint8Array.from([]),
-      };
-    } else {
-      const callData = ContractUtils.encodeERC20TransferCall(tokenAddress, recipient, amount);
-      call = {
-        to: tokenAddress,
-        value: BigInt(0),
-        data: callData,
-      };
-    }
-    return await this._executeUserOperation(call, txOptions);
-  }
-
-  /**
-   * Transfers an NFT with a given tokenId to the recipient.
-   * @param nftContractAddress Address of the ERC721 token contract.
-   * @param recipient Address of the recipient.
-   * @param tokenId ID of the token to transfer.
-   * @param txOptions are the transaction options.
-   * @returns
-   */
-  async transferNFT(
-    nftContractAddress: string,
-    recipient: string,
-    tokenId: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
-  ) {
-    const callData = ContractUtils.encodeERC721SafeTransferCall(
-      this.wallet.getSender(),
-      nftContractAddress,
-      recipient,
-      tokenId
-    );
-    const call: ICall = {
-      to: nftContractAddress,
-      value: BigInt(0),
-      data: callData,
-    };
-    return await this._executeUserOperation(call, txOptions);
-  }
-
-  /**
    * Executes a batch of calls in a single transaction.
    * @param calls are the calls to be executed.
    * @param txOptions are the transaction options.
@@ -175,52 +115,6 @@ export class FuseSDK {
   }
 
   /**
-   * Approves a spender to spend a specified amount of tokens on behalf of the user.
-   * @param tokenAddress Address of the ERC20 token contract.
-   * @param spender Address of the spender.
-   * @param amount Amount of tokens to approve.
-   * @param txOptions are the transaction options.
-   * @returns
-   */
-  async approveToken(
-    tokenAddress: string,
-    spender: string,
-    amount: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
-  ) {
-    return await this._executeTokenOperation(
-      tokenAddress,
-      spender,
-      amount,
-      ContractUtils.encodeERC20ApproveCall,
-      txOptions
-    );
-  }
-
-  /**
-   * Approves a spender to spend a specified NFT on behalf of the user.
-   * @param nftContractAddress Address of the ERC721 token contract.
-   * @param spender Address of the spender.
-   * @param tokenId ID of the token to approve.
-   * @param txOptions are the transaction options.
-   * @returns
-   */
-  async approveNFT(
-    nftContractAddress: string,
-    spender: string,
-    tokenId: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
-  ) {
-    return await this._executeTokenOperation(
-      nftContractAddress,
-      spender,
-      tokenId,
-      ContractUtils.encodeERC721ApproveCall,
-      txOptions
-    );
-  }
-
-  /**
    * Calls a contract with the specified parameters.
    * This method facilitates direct contract interactions.
    * @param to is the address of the contract to call.
@@ -238,42 +132,6 @@ export class FuseSDK {
     return await this._executeUserOperation(call, txOptions);
   }
 
-  /**
-   * Approves a token for spending and then calls a contract.
-   *
-   * This method first approves a certain amount of tokens for a spender and then
-   * makes a contract call. It's commonly used in scenarios like interacting with
-   * DeFi protocols where a token approval is required before making a transaction.
-   *
-   * @param tokenAddress Address of the ERC20 token contract.
-   * @param spender Address of the spender.
-   * @param amount Amount of tokens to approve.
-   * @param callData is the encoded data for the subsequent contract call after approval.
-   * @param txOptions are the transaction options.
-   * @returns
-   */
-  async approveTokenAndCallContract(
-    tokenAddress: string,
-    spender: string,
-    amount: BigNumberish,
-    callData: Uint8Array,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
-  ) {
-    const approveCallData = ContractUtils.encodeERC20ApproveCall(tokenAddress, spender, amount);
-    const calls: Array<ICall> = [
-      {
-        to: tokenAddress,
-        value: BigInt(0),
-        data: approveCallData,
-      },
-      {
-        to: spender,
-        value: BigInt(0),
-        data: callData,
-      },
-    ];
-    return await this.executeBatch(calls, txOptions);
-  }
 
   private async _getNativeBalance(address: string): Promise<ethers.BigNumber> {
     const web3client = this.wallet.proxy.provider;
@@ -480,79 +338,5 @@ export class FuseSDK {
         rethrowError(e);
       }
     }
-  }
-
-  /**
-   * Processes a token operation, either executing it directly or approving and then executing.
-   *
-   * This method checks if the token is native. If it is, it directly executes the operation.
-   * If not, it checks the allowance of the token. If the allowance is sufficient, it executes the operation.
-   * Otherwise, it first approves the token and then executes the operation.
-   *
-   * @param tokenAddress is the address of the token involved in the operation.
-   * @param spender is the address that will spend or receive the tokens.
-   * @param callData is the encoded data for the operation.
-   * @param amount is the amount of tokens involved in the operation.
-   * @param options are the transaction options.
-   * @returns
-   */
-  private async _processOperation({
-    tokenAddress,
-    spender,
-    callData,
-    amount,
-    options,
-  }: {
-    tokenAddress: string;
-    spender: string;
-    callData: Uint8Array;
-    amount: ethers.BigNumberish;
-    options?: typeof Variables.DEFAULT_TX_OPTIONS;
-  }) {
-    if (this._isNativeToken(tokenAddress)) {
-      return await this._executeUserOperation(
-        {
-          to: spender,
-          value: amount,
-          data: callData,
-        },
-        options
-      );
-    }
-    const tokenAllowance = await this.getAllowance(tokenAddress, spender);
-    if (tokenAllowance >= amount) {
-      return await this._executeUserOperation(
-        {
-          to: spender,
-          value: BigInt(0),
-          data: callData,
-        },
-        options
-      );
-    } else {
-      return await this.approveTokenAndCallContract(
-        tokenAddress,
-        spender,
-        amount,
-        callData,
-        options
-      );
-    }
-  }
-
-  private async _executeTokenOperation(
-    contractAddress: string,
-    to: string,
-    value: ethers.BigNumberish,
-    encoder: Function,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
-  ) {
-    const callData = encoder(contractAddress, to, value);
-    const call: ICall = {
-      to: contractAddress,
-      value: BigInt(0),
-      data: callData,
-    };
-    return await this._executeUserOperation(call, txOptions);
   }
 }
