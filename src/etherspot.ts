@@ -1,7 +1,6 @@
 import {
   BundlerJsonRpcProvider,
   IPresetBuilderOpts,
-  IUserOperationBuilder,
   UserOperationBuilder,
   UserOperationMiddlewareFn,
 } from 'userop';
@@ -16,8 +15,8 @@ import {
   EtherspotWallet__factory,
   EtherspotWallet as EtherspotWalletContract,
 } from '@etherspot/prime-sdk/dist/sdk/contracts';
+import { Variables } from './constants/variables';
 
-export const ETHERSPOT_FACTORY = '0x7f6d8F107fE8551160BD5351d5F1514A6aD5d40E';
 export class EtherspotWallet extends UserOperationBuilder {
   private signer: ethers.Signer;
   private provider: ethers.providers.JsonRpcProvider;
@@ -35,7 +34,7 @@ export class EtherspotWallet extends UserOperationBuilder {
       this.provider
     );
     this.factory = EtherspotWalletFactory__factory.connect(
-      opts?.factory || ETHERSPOT_FACTORY,
+      opts?.factory || Variables.ETHERSPOT_FACTORY,
       this.provider
     );
     this.initCode = '0x';
