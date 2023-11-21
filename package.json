@@ -1,5 +1,5 @@
 {
-  "name": "fuse_wallet_sdk_ts",
+  "name": "fusebox-web-sdk",
   "version": "0.1.0",
   "description": "",
   "main": "dist/src/index.js",
