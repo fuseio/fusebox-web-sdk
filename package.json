@@ -1,5 +1,5 @@
 {
-  "name": "fusebox-web-sdk",
+  "name": "@fuseio/fusebox-web-sdk",
   "version": "0.1.0",
   "description": "",
   "main": "dist/src/index.js",
