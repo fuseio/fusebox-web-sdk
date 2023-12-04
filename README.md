@@ -102,7 +102,7 @@ For detailed information on each method and additional features, refer to the Fu
 For support or to report issues, please visit the Fuse Community [Forum](https://forum.fuse.io/).
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE.md) file for details.
 
 This README provides a comprehensive overview of the FuseBox Web SDK. For in-depth information, consult the official [documentation](https://docs.fuse.io/docs/developers/fuse-box/fuse-sdk/).
 
