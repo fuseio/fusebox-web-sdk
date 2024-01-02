@@ -53,11 +53,13 @@ export class FuseSDK {
       paymasterContext,
       opts,
       clientOpts,
+      jwtToken,
     }: {
       withPaymaster?: boolean;
       paymasterContext?: Record<string, unknown>;
       opts?: IPresetBuilderOpts;
       clientOpts?: IClientOpts;
+      jwtToken?: string;
     } = {}
   ): Promise<FuseSDK> {
     const fuseSDK = new FuseSDK(publicApiKey);
@@ -71,7 +73,11 @@ export class FuseSDK {
       opts,
       paymasterMiddleware
     );
-    await fuseSDK.authenticate(credentials);
+    if(jwtToken) {
+      fuseSDK._jwtToken = jwtToken;
+    } else {
+      await fuseSDK.authenticate(credentials);
+    }
     fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey), {
       ...clientOpts,
     });
