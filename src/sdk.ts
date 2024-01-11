@@ -147,12 +147,24 @@ export class FuseSDK {
    * @param txOptions are the transaction options.
    * @returns
    */
-  async callContract(to: string, value: BigNumberish, data: Uint8Array, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
+  async callContract(to: string, value: BigNumberish, data: Uint8Array, isIndependentTransaction?: boolean, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
     const call: ICall = {
       to: to,
       value: value,
       data: data,
     };
+
+    if(isIndependentTransaction) {
+      this._nonceManager.increment();
+      this.wallet = await FuseSDK._initializeWallet(
+        this._credentials,
+        this._publicApiKey,
+        this._opts,
+        this._paymasterMiddleware,
+        this._nonceManager.retrieve()
+      );
+    }
+
     return await this._executeUserOperation(call, txOptions);
   }
 
