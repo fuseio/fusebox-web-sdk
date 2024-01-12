@@ -105,15 +105,9 @@ export class FuseSDK {
     const initialFees = BigInt(txOptions.feePerGas);
     this.setWalletFees(initialFees);
 
-    if(isIndependentTransaction) {
+    if (isIndependentTransaction) {
       this._nonceManager.increment();
-      this.wallet = await FuseSDK._initializeWallet(
-        this._credentials,
-        this._publicApiKey,
-        this._opts,
-        this._paymasterMiddleware,
-        this._nonceManager.retrieve()
-      );
+      this.wallet.nonceKey = this._nonceManager.retrieve();
     }
 
     try {
@@ -154,15 +148,9 @@ export class FuseSDK {
       data: data,
     };
 
-    if(isIndependentTransaction) {
+    if (isIndependentTransaction) {
       this._nonceManager.increment();
-      this.wallet = await FuseSDK._initializeWallet(
-        this._credentials,
-        this._publicApiKey,
-        this._opts,
-        this._paymasterMiddleware,
-        this._nonceManager.retrieve()
-      );
+      this.wallet.nonceKey = this._nonceManager.retrieve();
     }
 
     return await this._executeUserOperation(call, txOptions);

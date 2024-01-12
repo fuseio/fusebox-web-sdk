@@ -24,7 +24,7 @@ export class EtherspotWallet extends UserOperationBuilder {
   private factory: EtherspotWalletFactory;
   private initCode: string;
   proxy: EtherspotWalletContract;
-  private _nonceKey: number = 0;
+  nonceKey: number = 0;
 
   private constructor(signer: ethers.Signer, rpcUrl: string, opts?: IPresetBuilderOpts) {
     super();
@@ -44,7 +44,7 @@ export class EtherspotWallet extends UserOperationBuilder {
 
   /// Resolves the nonce and init code for the EtherspotWallet contract creation.
   private resolveAccount: UserOperationMiddlewareFn = async (ctx) => {
-    ctx.op.nonce = await this.entryPoint.getNonce(ctx.op.sender, this._nonceKey);
+    ctx.op.nonce = await this.entryPoint.getNonce(ctx.op.sender, this.nonceKey);
     ctx.op.initCode = ctx.op.nonce.eq(0) ? this.initCode : '0x';
   };
 
@@ -57,8 +57,8 @@ export class EtherspotWallet extends UserOperationBuilder {
   ): Promise<EtherspotWallet> {
     const instance = new EtherspotWallet(signer, rpcUrl, opts);
 
-    if(nonceKey) {
-      instance._nonceKey = nonceKey;
+    if (nonceKey) {
+      instance.nonceKey = nonceKey;
     }
     
 
