@@ -10,6 +10,6 @@ export class Variables {
     feePerGas: '10000000000',
     feeIncrementPercentage: 10,
     withRetry: false,
-    isIndependentTransaction: false,
+    useNonceSequence: false,
   };
 }

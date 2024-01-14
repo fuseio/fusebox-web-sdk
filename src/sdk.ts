@@ -99,7 +99,7 @@ export class FuseSDK {
     const initialFees = BigInt(txOptions.feePerGas);
     this.setWalletFees(initialFees);
 
-    if (txOptions.isIndependentTransaction) {
+    if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
       this.wallet.nonceKey = this._nonceManager.retrieve();
     }
@@ -142,7 +142,7 @@ export class FuseSDK {
       data: data,
     };
 
-    if (txOptions?.isIndependentTransaction) {
+    if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
       this.wallet.nonceKey = this._nonceManager.retrieve();
     }
