@@ -8,7 +8,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { ICall } from 'userop';
 import { EntryPoint, EntryPoint__factory } from 'userop/dist/typechain';
 import { ERC4337 } from 'userop/dist/constants';
-import { EOASignature, estimateUserOperationGas, getGasPrice } from 'userop/dist/preset/middleware';
+import { signUserOpHash, estimateUserOperationGas, getGasPrice } from 'userop/dist/preset/middleware';
 import {
   EtherspotWalletFactory,
   EtherspotWalletFactory__factory,
@@ -87,7 +87,7 @@ export class EtherspotWallet extends UserOperationBuilder {
       ? base.useMiddleware(opts.paymasterMiddleware)
       : base.useMiddleware(estimateUserOperationGas(instance.provider));
 
-    return withPM.useMiddleware(EOASignature(instance.signer));
+    return withPM.useMiddleware(signUserOpHash(instance.signer));
   }
 
   /// Executes a transaction on the network.
