@@ -24,7 +24,7 @@ export class EtherspotWallet extends UserOperationBuilder {
   private factory: EtherspotWalletFactory;
   private initCode: string;
   proxy: EtherspotWalletContract;
-  nonceKey: number = 0;
+  nonceKey: number;
 
   private constructor(signer: ethers.Signer, rpcUrl: string, opts?: IPresetBuilderOpts) {
     super();
@@ -39,6 +39,7 @@ export class EtherspotWallet extends UserOperationBuilder {
       this.provider
     );
     this.initCode = '0x';
+    this.nonceKey = opts?.nonceKey ?? 0;
     this.proxy = EtherspotWallet__factory.connect(ethers.constants.AddressZero, this.provider);
   }
 
@@ -53,14 +54,9 @@ export class EtherspotWallet extends UserOperationBuilder {
     signer: ethers.Signer,
     rpcUrl: string,
     opts?: IPresetBuilderOpts,
-    nonceKey?: number
   ): Promise<EtherspotWallet> {
     const instance = new EtherspotWallet(signer, rpcUrl, opts);
 
-    if (nonceKey) {
-      instance.nonceKey = nonceKey;
-    }
-    
 
     try {
       instance.initCode = ethers.utils.hexConcat([

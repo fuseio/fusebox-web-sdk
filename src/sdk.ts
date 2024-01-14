@@ -262,7 +262,6 @@ export class FuseSDK {
     publicApiKey: string,
     opts?: IPresetBuilderOpts,
     paymasterMiddleware?: UserOperationMiddlewareFn,
-    nonceKey?: number
   ): Promise<EtherspotWallet> {
     return EtherspotWallet.init(credentials, FuseSDK._getBundlerRpc(publicApiKey), {
       entryPoint: opts?.entryPoint,
@@ -270,7 +269,7 @@ export class FuseSDK {
       salt: opts?.salt,
       paymasterMiddleware: opts?.paymasterMiddleware ?? paymasterMiddleware,
       overrideBundlerRpc: opts?.overrideBundlerRpc,
-    }, nonceKey);
+    });
   }
 
   /**
