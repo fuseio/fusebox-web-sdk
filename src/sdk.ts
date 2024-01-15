@@ -108,7 +108,7 @@ export class FuseSDK {
       const userOp = this.wallet.executeBatch(calls);
       return await this.client.sendUserOperation(userOp);
     } catch (e: any) {
-      if (e.message.contains(this._feeTooLowError) && txOptions.withRetry) {
+      if (txOptions.withRetry && e.message.includes(this._feeTooLowError)) {
         const increasedFees = this._increaseFeeByPercentage(
           initialFees,
           txOptions.feeIncrementPercentage
