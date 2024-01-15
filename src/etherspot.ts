@@ -57,24 +57,9 @@ export class EtherspotWallet extends UserOperationBuilder {
   ): Promise<EtherspotWallet> {
     const instance = new EtherspotWallet(signer, rpcUrl, opts);
 
-
-    try {
-      instance.initCode = ethers.utils.hexConcat([
-        instance.factory.address,
-        instance.factory.interface.encodeFunctionData('createAccount', [
-          await instance.signer.getAddress(),
-          ethers.BigNumber.from(opts?.salt ?? 0),
-        ]),
-      ]);
-      await instance.entryPoint.callStatic.getSenderAddress(instance.initCode);
-
-      throw new Error('getSenderAddress: unexpected result');
-    } catch (error: any) {
-      const addr = error?.errorArgs?.sender;
-      if (!addr) throw error;
-
-      instance.proxy = EtherspotWallet__factory.connect(addr, instance.provider);
-    }
+    const eoa = await instance.signer.getAddress();
+    const sca = await instance.factory.getAddress(eoa, ethers.BigNumber.from(opts?.salt ?? 0))
+    instance.proxy = EtherspotWallet__factory.connect(sca, instance.provider);
 
     const base = instance
       .useDefaults({
