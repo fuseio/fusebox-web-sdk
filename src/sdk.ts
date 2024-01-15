@@ -56,12 +56,14 @@ export class FuseSDK {
       opts,
       clientOpts,
       jwtToken,
+      signature,
     }: {
       withPaymaster?: boolean;
       paymasterContext?: Record<string, unknown>;
       opts?: IPresetBuilderOpts;
       clientOpts?: IClientOpts;
       jwtToken?: string;
+      signature?: string;
     } = {}
   ): Promise<FuseSDK> {
     const fuseSDK = new FuseSDK(publicApiKey);
@@ -76,15 +78,16 @@ export class FuseSDK {
       credentials,
       publicApiKey,
       opts,
-      paymasterMiddleware
+      paymasterMiddleware,
+      signature
     );
-    
-    if(jwtToken) {
+
+    if (jwtToken) {
       fuseSDK._jwtToken = jwtToken;
     } else {
       await fuseSDK.authenticate(credentials);
     }
-    
+
     fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey), {
       ...clientOpts,
     });
@@ -268,14 +271,20 @@ export class FuseSDK {
     publicApiKey: string,
     opts?: IPresetBuilderOpts,
     paymasterMiddleware?: UserOperationMiddlewareFn,
+    signature?: string
   ): Promise<EtherspotWallet> {
-    return EtherspotWallet.init(credentials, FuseSDK._getBundlerRpc(publicApiKey), {
-      entryPoint: opts?.entryPoint,
-      factory: opts?.factory,
-      salt: opts?.salt,
-      paymasterMiddleware: opts?.paymasterMiddleware ?? paymasterMiddleware,
-      overrideBundlerRpc: opts?.overrideBundlerRpc,
-    });
+    return EtherspotWallet.init(
+      credentials,
+      FuseSDK._getBundlerRpc(publicApiKey),
+      {
+        entryPoint: opts?.entryPoint,
+        factory: opts?.factory,
+        salt: opts?.salt,
+        paymasterMiddleware: opts?.paymasterMiddleware ?? paymasterMiddleware,
+        overrideBundlerRpc: opts?.overrideBundlerRpc,
+      },
+      signature
+    );
   }
 
   /**

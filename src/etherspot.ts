@@ -54,6 +54,7 @@ export class EtherspotWallet extends UserOperationBuilder {
     signer: ethers.Signer,
     rpcUrl: string,
     opts?: IPresetBuilderOpts,
+    signature?: string,
   ): Promise<EtherspotWallet> {
     const instance = new EtherspotWallet(signer, rpcUrl, opts);
 
@@ -79,7 +80,7 @@ export class EtherspotWallet extends UserOperationBuilder {
     const base = instance
       .useDefaults({
         sender: instance.proxy.address,
-        signature: await instance.signer.signMessage(
+        signature: signature ?? await instance.signer.signMessage(
           ethers.utils.arrayify(ethers.utils.keccak256('0xdead'))
         ),
       })
