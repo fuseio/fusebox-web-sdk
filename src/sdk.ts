@@ -156,7 +156,32 @@ export class FuseSDK {
       this.wallet.nonceKey = this._nonceManager.retrieve();
     }
 
-    return await this._executeUserOperation(call, txOptions);
+    if (txOptions?.withRetry) {
+      const initialFees = BigInt(txOptions.feePerGas);
+      this.setWalletFees(initialFees);
+      try {
+        const userOp = this.wallet.execute(call.to, call.value, call.data);
+        return await this.client.sendUserOperation(userOp);
+      } catch (e: any) {
+        if (e.message.includes(this._feeTooLowError)) {
+          const increasedFees = this._increaseFeeByPercentage(
+            initialFees,
+            txOptions.feeIncrementPercentage
+          );
+          this.setWalletFees(increasedFees);
+          try {
+            const userOp = this.wallet.execute(call.to, call.value, call.data);
+            return await this.client.sendUserOperation(userOp);
+          } catch (e: any) {
+            rethrowError(e);
+          }
+        } else {
+          rethrowError(e);
+        }
+      }
+    } else {
+      return await this._executeUserOperation(call, txOptions);
+    }
   }
 
 
@@ -187,6 +212,34 @@ export class FuseSDK {
       'ERC20',
       'balanceOf',
       [address]
+  private async _executeUserOperation(
+    call: ICall,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ): Promise<ISendUserOperationResponse | null | undefined> {
+    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
+    const initialFees = BigInt(txOptions.feePerGas);
+    this.setWalletFees(initialFees);
+    try {
+      const userOp = this.wallet.execute(call.to, call.value, call.data);
+      return await this.client.sendUserOperation(userOp);
+    } catch (e: any) {
+      if (e.message.includes(this._feeTooLowError) && txOptions.withRetry) {
+        const increasedFees = this._increaseFeeByPercentage(
+          initialFees,
+          txOptions.feeIncrementPercentage
+        );
+        this.setWalletFees(increasedFees);
+        try {
+          const userOp = this.wallet.execute(call.to, call.value, call.data);
+          return await this.client.sendUserOperation(userOp);
+        } catch (e: any) {
+          rethrowError(e);
+        }
+      } else {
+        rethrowError(e);
+      }
+    }
+  }
     );
   }
 
