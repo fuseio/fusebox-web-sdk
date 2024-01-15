@@ -8,7 +8,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { ICall } from 'userop';
 import { EntryPoint, EntryPoint__factory } from 'userop/dist/typechain';
 import { ERC4337 } from 'userop/dist/constants';
-import { EOASignature, estimateUserOperationGas, getGasPrice } from 'userop/dist/preset/middleware';
+import { signUserOpHash, estimateUserOperationGas, getGasPrice } from 'userop/dist/preset/middleware';
 import {
   EtherspotWalletFactory,
   EtherspotWalletFactory__factory,
@@ -24,6 +24,7 @@ export class EtherspotWallet extends UserOperationBuilder {
   private factory: EtherspotWalletFactory;
   private initCode: string;
   proxy: EtherspotWalletContract;
+  nonceKey: number;
 
   private constructor(signer: ethers.Signer, rpcUrl: string, opts?: IPresetBuilderOpts) {
     super();
@@ -38,12 +39,13 @@ export class EtherspotWallet extends UserOperationBuilder {
       this.provider
     );
     this.initCode = '0x';
+    this.nonceKey = opts?.nonceKey ?? 0;
     this.proxy = EtherspotWallet__factory.connect(ethers.constants.AddressZero, this.provider);
   }
 
   /// Resolves the nonce and init code for the EtherspotWallet contract creation.
   private resolveAccount: UserOperationMiddlewareFn = async (ctx) => {
-    ctx.op.nonce = await this.entryPoint.getNonce(ctx.op.sender, 0);
+    ctx.op.nonce = await this.entryPoint.getNonce(ctx.op.sender, this.nonceKey);
     ctx.op.initCode = ctx.op.nonce.eq(0) ? this.initCode : '0x';
   };
 
@@ -51,9 +53,10 @@ export class EtherspotWallet extends UserOperationBuilder {
   public static async init(
     signer: ethers.Signer,
     rpcUrl: string,
-    opts?: IPresetBuilderOpts
+    opts?: IPresetBuilderOpts,
   ): Promise<EtherspotWallet> {
     const instance = new EtherspotWallet(signer, rpcUrl, opts);
+
 
     try {
       instance.initCode = ethers.utils.hexConcat([
@@ -87,7 +90,7 @@ export class EtherspotWallet extends UserOperationBuilder {
       ? base.useMiddleware(opts.paymasterMiddleware)
       : base.useMiddleware(estimateUserOperationGas(instance.provider));
 
-    return withPM.useMiddleware(EOASignature(instance.signer));
+    return withPM.useMiddleware(signUserOpHash(instance.signer));
   }
 
   /// Executes a transaction on the network.

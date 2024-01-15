@@ -1,7 +1,7 @@
 {
   "name": "@fuseio/fusebox-web-sdk",
-  "version": "0.1.2",
-  "description": "",
+  "version": "0.2.0",
+  "description": "Fuse Wallet SDK now has a JS implementation, making it even easier to integrate blockchain technology into your mobile apps.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "repository": {
@@ -34,7 +34,7 @@
     "axios": "^1.5.1",
     "ethers": "^5.5.2",
     "etherspot": "^1.44.0",
-    "userop": "^0.3.3",
+    "userop": "^0.3.7",
     "web3": "^4.1.2"
   }
 }

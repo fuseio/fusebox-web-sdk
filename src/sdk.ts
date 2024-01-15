@@ -15,6 +15,7 @@ import { ContractUtils } from './utils/contracts';
 import { rethrowError } from '@etherspot/prime-sdk/dist/sdk/common';
 import { Variables } from './constants/variables';
 import { ITokenDetails } from './types/token/token_details';
+import { NonceManager } from './utils/nonceManager';
 
 export class FuseSDK {
   private readonly _axios: AxiosInstance;
@@ -22,6 +23,7 @@ export class FuseSDK {
   private _jwtToken!: string;
   public wallet!: EtherspotWallet;
   public client!: Client;
+  private _nonceManager = new NonceManager();
 
   constructor(public readonly publicApiKey: string) {
     this._axios = axios.create({
@@ -63,21 +65,26 @@ export class FuseSDK {
     } = {}
   ): Promise<FuseSDK> {
     const fuseSDK = new FuseSDK(publicApiKey);
+
     let paymasterMiddleware;
+
     if (withPaymaster) {
       paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, paymasterContext);
     }
+
     fuseSDK.wallet = await FuseSDK._initializeWallet(
       credentials,
       publicApiKey,
       opts,
       paymasterMiddleware
     );
+    
     if(jwtToken) {
       fuseSDK._jwtToken = jwtToken;
     } else {
       await fuseSDK.authenticate(credentials);
     }
+    
     fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey), {
       ...clientOpts,
     });
@@ -92,11 +99,16 @@ export class FuseSDK {
    */
   async executeBatch(
     calls: Array<ICall>,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS,
   ): Promise<ISendUserOperationResponse | null | undefined> {
     txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
     const initialFees = BigInt(txOptions.feePerGas);
     this.setWalletFees(initialFees);
+
+    if (txOptions?.useNonceSequence) {
+      this._nonceManager.increment();
+      this.wallet.nonceKey = this._nonceManager.retrieve();
+    }
 
     try {
       const userOp = this.wallet.executeBatch(calls);
@@ -135,6 +147,12 @@ export class FuseSDK {
       value: value,
       data: data,
     };
+
+    if (txOptions?.useNonceSequence) {
+      this._nonceManager.increment();
+      this.wallet.nonceKey = this._nonceManager.retrieve();
+    }
+
     return await this._executeUserOperation(call, txOptions);
   }
 
@@ -249,7 +267,7 @@ export class FuseSDK {
     credentials: ethers.Signer,
     publicApiKey: string,
     opts?: IPresetBuilderOpts,
-    paymasterMiddleware?: UserOperationMiddlewareFn
+    paymasterMiddleware?: UserOperationMiddlewareFn,
   ): Promise<EtherspotWallet> {
     return EtherspotWallet.init(credentials, FuseSDK._getBundlerRpc(publicApiKey), {
       entryPoint: opts?.entryPoint,
