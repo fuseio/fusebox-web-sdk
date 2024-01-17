@@ -14,13 +14,17 @@ const main = async () => {
   const value = parseEther("0.001");
   const data = Uint8Array.from([]);
   const txOptions = { ...Variables.DEFAULT_TX_OPTIONS, useNonceSequence: true };
-  await Promise.all([
-    fuseSDK.executeBatch([
-      { to, value, data },
-      { to, value, data },
-      { to, value, data },
-    ], txOptions)
-  ])
+  const res = await fuseSDK.executeBatch([
+    { to, value, data },
+    { to, value, data },
+    { to, value, data },
+  ], txOptions)
+
+  console.log(`UserOpHash: ${res?.userOpHash}`);
+  console.log('Waiting for transaction...');
+
+  const receipt = await res?.wait();
+  console.log('Transaction Hash:', receipt?.transactionHash)
 };
 
 main();
