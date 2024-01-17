@@ -110,7 +110,7 @@ export class FuseSDK {
 
     if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
-      this.wallet.nonceKey = this._nonceManager.retrieve();
+      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();
     }
 
     try {
@@ -153,7 +153,7 @@ export class FuseSDK {
 
     if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
-      this.wallet.nonceKey = this._nonceManager.retrieve();
+      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();      
     }
 
     return await this._executeUserOperation(call, txOptions);
