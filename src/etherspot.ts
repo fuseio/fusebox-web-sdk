@@ -58,6 +58,13 @@ export class EtherspotWallet extends UserOperationBuilder {
   ): Promise<EtherspotWallet> {
     const instance = new EtherspotWallet(signer, rpcUrl, opts);
 
+    instance.initCode = ethers.utils.hexConcat([
+      instance.factory.address,
+      instance.factory.interface.encodeFunctionData('createAccount', [
+        await instance.signer.getAddress(),
+        ethers.BigNumber.from(opts?.salt ?? 0),
+      ]),
+    ]);
     const eoa = await instance.signer.getAddress();
     const sca = await instance.factory.getAddress(eoa, ethers.BigNumber.from(opts?.salt ?? 0))
     instance.proxy = EtherspotWallet__factory.connect(sca, instance.provider);
