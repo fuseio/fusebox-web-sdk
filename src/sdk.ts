@@ -81,16 +81,20 @@ export class FuseSDK {
       paymasterMiddleware,
       signature
     );
+    if (!fuseSDK.wallet) {
+      throw new Error('Failed to initialize EtherspotWallet.');
+    }
 
-    if (jwtToken) {
+    if (jwtToken && jwtToken !== '') {
       fuseSDK._jwtToken = jwtToken;
     } else {
       await fuseSDK.authenticate(credentials);
     }
 
-    fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey), {
-      ...clientOpts,
-    });
+    fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey), clientOpts);
+    if (!fuseSDK.client) {
+      throw new Error('Failed to initialize Client.');
+    }
     return fuseSDK;
   }
 
@@ -109,7 +113,10 @@ export class FuseSDK {
     this.setWalletFees(initialFees);
 
     if (txOptions?.useNonceSequence) {
+      if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
+      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();
+    }
       this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();
     }
 
@@ -127,7 +134,7 @@ export class FuseSDK {
           const userOp = this.wallet.executeBatch(calls);
           return await this.client.sendUserOperation(userOp);
         } catch (e: any) {
-          rethrowError(e);
+          throw e;
         }
       } else {
         rethrowError(e);
@@ -178,7 +185,7 @@ export class FuseSDK {
    * @returns BigInt representing the balance of the address for the specified token.
    */
   async getBalance(tokenAddress: string, address: string) {
-    if (this._isNativeToken(tokenAddress)) {
+    if (this._isNativeToken(tokenAddress.toLowerCase())) {
       return await this._getNativeBalance(address);
     }
     return ContractUtils.readFromContractWithFirstResult(
@@ -254,6 +261,9 @@ export class FuseSDK {
   async authenticate(credentials: ethers.Signer): Promise<string> {
     const auth = await SmartWalletAuth.signer(credentials, this.wallet.getSender());
     const response = await this._axios.post('/v2/smart-wallets/auth', auth.toJson());
+    if (!response.data.jwt) {
+      throw new Error('Failed to authenticate user.');
+    }
     this._jwtToken = response.data.jwt;
     return response.data.jwt;
   }
