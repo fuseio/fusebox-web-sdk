@@ -45,8 +45,12 @@ export class EtherspotWallet extends UserOperationBuilder {
 
   /// Resolves the nonce and init code for the EtherspotWallet contract creation.
   private resolveAccount: UserOperationMiddlewareFn = async (ctx) => {
-    ctx.op.nonce = await this.entryPoint.getNonce(ctx.op.sender, this.nonceKey);
-    ctx.op.initCode = ctx.op.nonce.eq(0) ? this.initCode : '0x';
+    const [nonce, code] = await Promise.all([
+      this.entryPoint.getNonce(ctx.op.sender, this.nonceKey),
+      this.provider.getCode(ctx.op.sender),
+    ]);
+    ctx.op.nonce = nonce;
+    ctx.op.initCode = code === "0x" ? this.initCode : "0x";
   };
 
   /// Initializes a EtherspotWallet object and returns it.
