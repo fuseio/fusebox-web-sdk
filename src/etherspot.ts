@@ -14,7 +14,7 @@ import {
   EtherspotWalletFactory__factory,
   EtherspotWallet__factory,
   EtherspotWallet as EtherspotWalletContract,
-} from '@etherspot/prime-sdk/dist/sdk/contracts';
+} from './typechain';
 import { Variables } from './constants/variables';
 
 export class EtherspotWallet extends UserOperationBuilder {

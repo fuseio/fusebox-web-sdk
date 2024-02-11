@@ -10,12 +10,14 @@
   },
   "scripts": {
     "prepare": "npm run build",
+    "gen:types": "typechain --target=ethers-v5 --out-dir=src/typechain 'abi/*.json'",
     "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@typechain/ethers-v5": "^11.1.2",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
@@ -25,16 +27,14 @@
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-promise": "^6.1.1",
     "prettier": "^3.0.3",
+    "typechain": "^8.3.2",
     "typedoc": "^0.25.2",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@etherspot/prime-sdk": "^1.2.11",
     "@ethersproject/providers": "^5.7.2",
     "axios": "^1.5.1",
     "ethers": "^5.5.2",
-    "etherspot": "^1.44.0",
-    "userop": "^0.3.7",
-    "web3": "^4.1.2"
+    "userop": "^0.3.7"
   }
 }
