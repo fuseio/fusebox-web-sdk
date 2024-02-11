@@ -18,6 +18,7 @@
   "license": "MIT",
   "devDependencies": {
     "@typechain/ethers-v5": "^11.1.2",
+    "@types/node": "^20.11.17",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
