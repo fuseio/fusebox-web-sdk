@@ -12,7 +12,6 @@ import { EtherspotWallet } from './etherspot';
 import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 import { SmartWalletAuth } from './utils/auth';
 import { ContractUtils } from './utils/contracts';
-import { rethrowError } from '@etherspot/prime-sdk/dist/sdk/common';
 import { Variables } from './constants/variables';
 import { ITokenDetails } from './types/token/token_details';
 import { NonceManager } from './utils/nonceManager';
@@ -127,10 +126,10 @@ export class FuseSDK {
           const userOp = this.wallet.executeBatch(calls);
           return await this.client.sendUserOperation(userOp);
         } catch (e: any) {
-          rethrowError(e);
+          throw e;
         }
       } else {
-        rethrowError(e);
+        throw e;
       }
     }
   }
@@ -153,7 +152,7 @@ export class FuseSDK {
 
     if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
-      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();      
+      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();
     }
 
     return await this._executeUserOperation(call, txOptions);
@@ -365,10 +364,10 @@ export class FuseSDK {
           const userOp = this.wallet.execute(call.to, call.value, call.data);
           return await this.client.sendUserOperation(userOp);
         } catch (e: any) {
-          rethrowError(e);
+          throw e;
         }
       } else {
-        rethrowError(e);
+        throw e;
       }
     }
   }
