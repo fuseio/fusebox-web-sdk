@@ -24,9 +24,12 @@ export class FuseSDK {
   public client!: Client;
   private _nonceManager = new NonceManager();
 
-  constructor(public readonly publicApiKey: string) {
+  constructor(
+    public readonly publicApiKey: string,
+    baseUrl = Variables.BASE_URL
+  ) {
     this._axios = axios.create({
-      baseURL: `https://${Variables.BASE_URL}/api`,
+      baseURL: `https://${baseUrl}/api`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -56,6 +59,7 @@ export class FuseSDK {
       clientOpts,
       jwtToken,
       signature,
+      baseUrl = Variables.BASE_URL,
     }: {
       withPaymaster?: boolean;
       paymasterContext?: Record<string, unknown>;
@@ -63,9 +67,10 @@ export class FuseSDK {
       clientOpts?: IClientOpts;
       jwtToken?: string;
       signature?: string;
+      baseUrl?: string;
     } = {}
   ): Promise<FuseSDK> {
-    const fuseSDK = new FuseSDK(publicApiKey);
+    const fuseSDK = new FuseSDK(publicApiKey, baseUrl);
 
     let paymasterMiddleware;
 
@@ -281,6 +286,7 @@ export class FuseSDK {
         salt: opts?.salt,
         paymasterMiddleware: opts?.paymasterMiddleware ?? paymasterMiddleware,
         overrideBundlerRpc: opts?.overrideBundlerRpc,
+        nonceKey: opts?.nonceKey,
       },
       signature
     );
