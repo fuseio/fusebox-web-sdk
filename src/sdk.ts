@@ -75,12 +75,13 @@ export class FuseSDK {
     let paymasterMiddleware;
 
     if (withPaymaster) {
-      paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, paymasterContext);
+      paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, baseUrl, paymasterContext);
     }
 
     fuseSDK.wallet = await FuseSDK._initializeWallet(
       credentials,
       publicApiKey,
+      baseUrl,
       opts,
       paymasterMiddleware,
       signature
@@ -92,7 +93,7 @@ export class FuseSDK {
       await fuseSDK.authenticate(credentials);
     }
 
-    fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey), {
+    fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey, baseUrl), {
       ...clientOpts,
     });
     return fuseSDK;
@@ -273,13 +274,14 @@ export class FuseSDK {
   private static async _initializeWallet(
     credentials: ethers.Signer,
     publicApiKey: string,
+    baseUrl: string,
     opts?: IPresetBuilderOpts,
     paymasterMiddleware?: UserOperationMiddlewareFn,
     signature?: string
   ): Promise<EtherspotWallet> {
     return EtherspotWallet.init(
       credentials,
-      FuseSDK._getBundlerRpc(publicApiKey),
+      FuseSDK._getBundlerRpc(publicApiKey, baseUrl),
       {
         entryPoint: opts?.entryPoint,
         factory: opts?.factory,
@@ -297,8 +299,8 @@ export class FuseSDK {
    * @param publicApiKey is required to authenticate with the Fuse API.
    * @returns
    */
-  private static _getBundlerRpc(publicApiKey: string): string {
-    return `https://${Variables.BASE_URL}/api/v0/bundler?apiKey=${publicApiKey}`;
+  private static _getBundlerRpc(publicApiKey: string, baseUrl: string): string {
+    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`;
   }
 
   /**
@@ -309,10 +311,11 @@ export class FuseSDK {
    */
   private static _getPaymasterMiddleware(
     publicApiKey: string,
+    baseUrl: string,
     paymasterContext?: Record<string, unknown>
   ): UserOperationMiddlewareFn {
     return verifyingPaymaster(
-      `https://${Variables.BASE_URL}/api/v0/paymaster?apiKey=${publicApiKey}`,
+      `https://${baseUrl}/api/v0/paymaster?apiKey=${publicApiKey}`,
       paymasterContext ?? {}
     );
   }
