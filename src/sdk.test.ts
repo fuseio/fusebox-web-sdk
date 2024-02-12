@@ -10,7 +10,7 @@ describe('FuseSDK', () => {
   });
 
   describe('_getPaymasterMiddleware', () => {
-    it('should generate the correct paymaster middleware URL', () => {
+    it('should generate the correct paymaster middleware URL with specific publicApiKey and baseUrl', () => {
       const publicApiKey = 'dummy-public-api-key';
       const baseUrl = 'dummy-base-url';
       const paymasterContext = { context: 'dummy-context' };
@@ -23,7 +23,7 @@ describe('FuseSDK', () => {
       expect(paymasterMiddleware.context).toEqual(paymasterContext);
     });
 
-    it('should generate the correct paymaster middleware URL without paymasterContext', () => {
+    it('should generate the correct paymaster middleware URL without paymasterContext and with specific publicApiKey and baseUrl', () => {
       const publicApiKey = 'dummy-public-api-key';
       const baseUrl = 'dummy-base-url';
 
