@@ -34,7 +34,28 @@ describe('FuseSDK', () => {
       expect(paymasterMiddleware.url).toBe(expectedUrl);
       expect(paymasterMiddleware.context).toEqual({});
     });
+    it('should generate the correct bundler RPC URL with specific publicApiKey and baseUrl', () => {
+    const publicApiKey = 'dummy-public-api-key';
+    const baseUrl = 'dummy-base-url';
+
+    const expectedUrl = `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`;
+
+    const bundlerRpcUrl = FuseSDK._getBundlerRpc(publicApiKey, baseUrl);
+
+    expect(bundlerRpcUrl).toBe(expectedUrl);
   });
+
+  it('should generate the correct bundler RPC URL without specific publicApiKey and baseUrl', () => {
+    const publicApiKey = 'dummy-public-api-key';
+    const baseUrl = 'dummy-base-url';
+
+    const expectedUrl = `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`;
+
+    const bundlerRpcUrl = FuseSDK._getBundlerRpc(publicApiKey, baseUrl);
+
+    expect(bundlerRpcUrl).toBe(expectedUrl);
+  });
+});
 
   describe('_getBundlerRpc', () => {
     it('should generate the correct bundler RPC URL', () => {
@@ -49,6 +70,6 @@ describe('FuseSDK', () => {
     });
   });
 
-  // Add more unit tests for other methods in the FuseSDK class
+    // Add more unit tests for other methods in the FuseSDK class
 
 });
