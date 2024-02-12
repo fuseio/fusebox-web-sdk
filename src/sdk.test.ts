@@ -1,4 +1,5 @@
 import { FuseSDK } from './sdk';
+import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 
 describe('FuseSDK', () => {
   let fuseSDK: FuseSDK;
