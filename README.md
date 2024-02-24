@@ -1,5 +1,5 @@
 <p align="center">                    
-<img  src="https://raw.githubusercontent.com/fuseio/fusebox-web-sdl/master/art/sdk_logo.svg" height="170">                    
+<img  src="https://raw.githubusercontent.com/fuseio/fusebox-web-sdk/master/art/sdk_logo.svg" height="170">                    
 </p>                    
 
 <p align="center">                    
