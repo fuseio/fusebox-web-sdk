@@ -1,5 +1,6 @@
+import { StakeRequestBody } from './types/staking/stake';
 import axios, { AxiosInstance } from 'axios';
-import ethers, { BigNumberish } from 'ethers';
+import ethers, { BigNumber, BigNumberish } from 'ethers';
 import {
   Client,
   ICall,
@@ -13,8 +14,11 @@ import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 import { SmartWalletAuth } from './utils/auth';
 import { ContractUtils } from './utils/contracts';
 import { Variables } from './constants/variables';
-import { ITokenDetails } from './types/token/token_details';
+import { ERC20, Native, parseTokenDetails } from './types/token/token_details';
 import { NonceManager } from './utils/nonceManager';
+import { ExplorerModule, NftModule, StakingModule, TradeModule } from './modules';
+import { TradeRequestBody, UnstakeRequestBody } from './types';
+import { parseUnits } from 'ethers/lib/utils';
 
 export class FuseSDK {
   private readonly _axios: AxiosInstance;
@@ -22,7 +26,11 @@ export class FuseSDK {
   private _jwtToken!: string;
   public wallet!: EtherspotWallet;
   public client!: Client;
-  private _nonceManager = new NonceManager();
+  public tradeModule!: TradeModule;
+  public explorerModule!: ExplorerModule;
+  public stakingModule!: StakingModule;
+  public nftModule!: NftModule;
+  private _nonceManager!: NonceManager;
 
   constructor(
     public readonly publicApiKey: string,
@@ -37,6 +45,15 @@ export class FuseSDK {
         apiKey: publicApiKey,
       },
     });
+    this._initializeModules();
+  }
+
+  _initializeModules() {
+    this._nonceManager = new NonceManager();
+    this.tradeModule = new TradeModule(this._axios);
+    this.explorerModule = new ExplorerModule(this._axios);
+    this.stakingModule = new StakingModule(this._axios);
+    this.nftModule = new NftModule(this._axios);
   }
 
   /**
@@ -222,17 +239,11 @@ export class FuseSDK {
    * If the provided tokenAddress matches the native token address, it returns a native token with zero amount.
    *
    * @param tokenAddress Address of the ERC20 token contract.
-   * @returns a ITokenDetails object containing the token's name, symbol, decimals, and other relevant details.
+   * @returns a ERC20 object containing the token's name, symbol, decimals, and other relevant details.
    */
   async getERC20TokenDetails(tokenAddress: string) {
     if (this._isNativeToken(tokenAddress)) {
-      return {
-        symbol: 'ETH',
-        name: 'Ether',
-        decimals: 18,
-        address: tokenAddress,
-        amount: BigInt(0),
-      };
+      return new Native({ amount: BigInt(0) });
     }
     const toRead = ['name', 'symbol', 'decimals'];
     const token = await Promise.all(
@@ -242,13 +253,15 @@ export class FuseSDK {
     );
 
     const [name, symbol, decimals] = token;
-    return {
-      symbol: symbol as string,
-      name: name as string,
-      decimals: decimals as number,
+
+    return parseTokenDetails({
       address: tokenAddress,
+      name,
+      symbol,
+      decimals,
       amount: BigInt(0),
-    } as ITokenDetails;
+      type: 'ERC-20'
+    }) as ERC20;
   }
 
   /**
@@ -379,5 +392,257 @@ export class FuseSDK {
         throw e;
       }
     }
+  }
+
+  async _processOperation(
+    tokenAddress: string,
+    spender: string,
+    callData: Uint8Array,
+    amount?: BigNumberish,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ) {
+    if (this._isNativeToken(tokenAddress)) {
+      return this.callContract(spender, amount ?? 0, callData, txOptions);
+    }
+
+    const tokenAllowance = await this.getAllowance(tokenAddress, spender);
+
+    if (BigNumber.from(tokenAllowance).gte(BigNumber.from(amount))) {
+
+      return this.callContract(spender, 0, callData, txOptions);
+    } else {
+      const approveCallData = ContractUtils.encodeERC20ApproveCall(
+        spender,
+        amount!,
+      )
+
+      const calls = [
+        {
+          to: tokenAddress,
+          value: BigInt(0),
+          data: approveCallData,
+        },
+        {
+          to: spender,
+          value: BigInt(0),
+          data: callData,
+        },
+      ];
+
+      return this.executeBatch(calls, txOptions);
+    }
+  }
+
+  /**
+    * Transfers a specified [amount] of tokens from the user's address to the [recipientAddress].
+    *
+    * @param tokenAddress - Address of the token contract.
+    * @param recipientAddress - Address of the recipient.
+    * @param amount - Amount of tokens to transfer.
+    * @param options - Additional transaction options.
+   */
+  async transferToken(
+    tokenAddress: string,
+    recipientAddress: string,
+    amount: BigNumberish,
+    data?: Uint8Array,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ) {
+    data = data ?? new Uint8Array(0);
+    if (this._isNativeToken(tokenAddress)) {
+      return this.callContract(recipientAddress, amount, data, txOptions);
+    } else {
+      const transferCallData = ContractUtils.encodeERC20TransferCall(
+        recipientAddress,
+        amount
+      ) as unknown as Uint8Array;
+
+      return this.callContract(tokenAddress, BigInt(0), transferCallData, txOptions);
+    }
+  }
+
+  /**
+   * Transfers an NFT with a given [tokenId] to the [recipientAddress].
+   *
+   * @param nftContractAddress - Address of the NFT contract.
+   * @param recipientAddress - Address of the recipient.
+   * @param tokenId - ID of the token to transfer.
+   * @param options - Additional transaction options.
+   */
+  async transferNFT(
+    nftContractAddress: string,
+    recipientAddress: string,
+    tokenId: BigNumberish,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ) {
+    const transferCallData = ContractUtils.encodeERC271SafeTransferFromCall(
+      this.wallet.getSender(),
+      recipientAddress,
+      tokenId
+    ) as unknown as Uint8Array;
+
+    return this.callContract(nftContractAddress, BigInt(0), transferCallData, txOptions);
+  }
+
+  /**
+   *   /// Approves the [spender] to withdraw or transfer a certain [amount] of tokens on behalf of the user's address.
+   * 
+   * @param tokenAddress - Address of the token contract.
+   * @param spender - Address which will spend the tokens.
+   * @param amount - Amount of tokens to approve.
+   * @param txOptions Additional transaction options.
+   * @returns
+  */
+  async approveToken(
+    tokenAddress: string,
+    spender: string,
+    amount: BigNumberish,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ) {
+    const approveCallData = ContractUtils.encodeERC20ApproveCall(
+      spender,
+      amount
+    ) as unknown as Uint8Array;
+
+    return this.callContract(tokenAddress, BigInt(0), approveCallData, txOptions);
+  }
+
+
+  /**
+    * Approves a [spender] to transfer or withdraw a specific NFT [tokenId] on behalf of the user.
+    *
+    * @param nftContractAddress - Address of the token contract.
+    * @param spender - Address which will spend the tokens.
+    * @param tokenId - NFT token ID of item in the collection to approve.
+    * @param options - Additional transaction options.
+   */
+  async approveNFTToken(
+    nftContractAddress: string,
+    spender: string,
+    tokenId: BigNumberish,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ) {
+    const approveCallData = ContractUtils.encodeERC721ApproveCall(
+      spender,
+      tokenId
+    ) as unknown as Uint8Array;
+
+    return this.callContract(nftContractAddress, BigInt(0), approveCallData, txOptions);
+  }
+
+  /**
+   * Approves a token for spending and then calls a contract.
+   *
+   * This method first approves a certain amount of tokens for a spender and then
+   * makes a contract call. It's commonly used in scenarios like interacting with
+   * DeFi protocols where a token approval is required before making a transaction.
+   *
+   * @param tokenAddress - is the address of the ERC20 token to be approved.
+   * @param spender - is the address that will be approved to spend the tokens.
+   * @param value - is the amount of tokens to be approved for spending.
+   * @param callData - is the encoded data for the subsequent contract call after approval.
+   * @param options - provides additional transaction options.
+   */
+  async approveTokenAndCallContract(
+    tokenAddress: string,
+    spender: string,
+    amount: BigNumberish,
+    callData: Uint8Array,
+    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+  ) {
+    const approveCallData = ContractUtils.encodeERC20ApproveCall(
+      spender,
+      amount
+    ) as unknown as Uint8Array;
+
+    const calls = [
+      {
+        to: tokenAddress,
+        value: BigInt(0),
+        data: approveCallData,
+      },
+      {
+        to: spender,
+        value: BigInt(0),
+        data: callData,
+      },
+    ];
+
+    return this.executeBatch(calls, txOptions);
+  }
+
+  /**
+   * Swaps tokens based on the provided [tradeRequestBody].
+   *
+   * This method facilitates token swaps by interacting with the trade module.
+   * @param tradeRequestBody contains details about the token swap, such as the input and output tokens.
+   * @param options provides additional transaction options.
+   * @returns 
+   */
+  async swapTokens(tradeRequestBody: TradeRequestBody, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
+    const data = await this.tradeModule.requestParameters(tradeRequestBody);
+    const spender = data.rawTxn['to'];
+    const callData = data.rawTxn['data'];
+    const { amountIn, currencyIn } = tradeRequestBody;
+    const { decimals } = await this.getERC20TokenDetails(currencyIn);
+    const amount = parseUnits(amountIn, decimals.toString());
+
+    return this._processOperation(
+      currencyIn,
+      spender,
+      callData,
+      amount,
+      txOptions
+    );
+  }
+
+  /**
+    * Stakes tokens based on the provided [stakeRequestBody].
+    *
+    * This method facilitates token staking by interacting with the staking module.
+    * @param stakeRequestBody - contains details about the token staking, such as the token address and amount.
+    * @param options - provides additional transaction options.
+   */
+  async stakeToken(stakeRequestBody: StakeRequestBody, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
+    const data = await this.stakingModule.stake(stakeRequestBody);
+    const stakeCallData = data.encodedABI as unknown as Uint8Array;
+    const spender = data.contractAddress;
+
+    const amountIn = stakeRequestBody.tokenAmount;
+    const { decimals } = await this.getERC20TokenDetails(stakeRequestBody.tokenAddress);
+    const amount = parseUnits(amountIn, decimals.toString());
+
+    return this._processOperation(
+      stakeRequestBody.tokenAddress,
+      spender,
+      stakeCallData,
+      amount,
+      txOptions
+    );
+  }
+
+  /**
+   * Unstakes tokens based on the provided [unstakeRequestBody].
+   *
+   * This method facilitates token unstaking by interacting with the staking module.
+   * @param unstakeRequestBody - contains details about the token unstaking, such as the token address and amount.
+   * @param unStakeTokenAddress - is the address of the unstake token contract.
+   * @param options - provides additional transaction options.
+   */
+  async unstakeToken(unstakeRequestBody: UnstakeRequestBody, unStakeTokenAddress: string, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
+    const data = await this.stakingModule.unstake(unstakeRequestBody);
+    const unstakeCallData = data.encodedABI as unknown as Uint8Array;
+    const spender = data.contractAddress;
+    const amountIn = unstakeRequestBody.tokenAmount;
+    const { decimals } = await this.getERC20TokenDetails(unstakeRequestBody.tokenAddress);
+    const amount = parseUnits(amountIn, decimals.toString());
+
+    return this._processOperation(
+      unStakeTokenAddress,
+      spender,
+      unstakeCallData,
+      amount,
+      txOptions
+    );
   }
 }

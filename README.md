@@ -1,109 +1,234 @@
-# FuseBox Readme
+<p align="center">                    
+<img  src="https://raw.githubusercontent.com/fuseio/fusebox-web-sdl/master/art/sdk_logo.svg" height="170">                    
+</p>                    
 
-<img src="fuse-logo.png" width="40%" height="25%" />
+<p align="center">                    
+<a href="https://img.shields.io/badge/License-MIT-green"><img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"></a>                  
+</p>
 
-&nbsp;
+- [Introduction](#introduction)
+  - [Benefits of using FuseBox TS SDK](#benefits-of-using-fusebox-ts-sdk)
+  - [Purpose of the SDK](#purpose-of-the-sdk)
+- [Instantiation](#instantiation)
+  - [Examples](#examples)
+    - [Get Address](#get-address)
+    - [Send transactions](#send-transactions)
+    - [Send batch transactions](#send-batch-transactions)
+    - [Staking](#staking)
+    - [Unstake](#unstake)
+    - [Trading](#trading)
+- [Features](#features)
+    - [Get Address](#get-address-1)
+    - [Send transactions](#send-transactions-1)
+    - [Send batch transactions](#send-batch-transactions-1)
+    - [Sponsored Transactions](#sponsored-transactions)
+    - [Staking](#staking-1)
+    - [Trading](#trading-1)
+- [Troubleshooting](#troubleshooting)
+- [Limitations](#limitations)
 
-FuseBox Web SDK is a powerful toolkit designed to streamline the integration of your applications with the Fuse Blockchain. Leveraging this SDK empowers developers to effortlessly create Smart Contract Wallets, initiate User Operations, and tap into the Fuse Notification and Trade APIs which are COMING to the SDK in the next release. With a comprehensive set of methods, FuseBox Web SDK simplifies the development process, facilitating efficient integration with the Fuse Network.
+## Introduction
 
-## Key Features of the FuseBox Web SDK
+The FuseBox TS SDK is a set of tools for creating, managing, and engaging with FuseBox TS SDK in client applications. FuseBox TS SDK lets users create smart contract wallets([Based on ERC-4337](https://eips.ethereum.org/EIPS/eip-4337)) associated with each user's Externally Owned Account (EOA) that provide added security compared to traditional EOAs with a single private key. With FuseBox TS SDK, users can deposit funds that no one else can control and withdraw at any time.
 
-The FuseBox Web SDK all-in-one solution streamlines development, ensuring efficient integration with the Fuse Network.
+### Benefits of using FuseBox TS SDK
+Using FuseBox TS SDK provides several benefits, including:
 
-### Smart Contract Wallet Initialization
-The SDK simplifies the initializing of Smart Contract Wallets from an Externally Owned Account (EOA). Developers can easily manage wallet credentials and initiate Smart Contract Wallet creation. It is as seamless as running the code below:
+- **Enhanced security**: FuseBox TS SDK are non-custodial accounts that allow users to deposit funds that no one else can control and withdraw at any time. Each Fuse Smart Wallet is a smart contract associated with the user's EOA and can only be controlled by that user.
+- **Enhanced UX**: FuseBox TS SDK support gasless transactions, improving the user experience and making it more seamless to interact with the blockchain.
+- **Better developer experience**: The FuseBox TS SDK abstracts away the complexities of web3 development, such as cryptography, wallet management, and smart contract interactions, making it easier for developers to build blockchain-based applications
 
-### Wallet Action History Retrieval
-Developers can retrieve the complete history of User Operations carried out by a Smart Contract Wallet. This feature enables seamless auditing and tracking of wallet activities.
+### Purpose of the SDK
 
-### User Operation Transfers
-The SDK facilitates sending User Operations, whether with or without a Paymaster. This flexibility allows developers to implement customizable transaction functionalities within their applications.
+The SDK is designed to make it easy for developers to create, manage, and engage with FuseBox TS SDK in their applications. The SDK provides pre-built functions and utilities, allowing developers to interact with FuseBox TS SDK securely and efficiently.
 
-### Batch Transfers
-Effortlessly batch multiple User Operations, such as swaps, using the callContract or executeBatch method. This feature simplifies complex transactions, enhancing the overall user experience.
 
-### Notification Events - Coming Soon!
-Leveraging webhooks, the SDK empowers developers to receive real-time Notification events. This is essential for building responsive applications that react to blockchain events.
+## Instantiation
 
-### Trade APIs - Coming Soon!
-The Trade APIs offer various methods, including obtaining current and historical prices of various assets, tracking price changes over defined intervals, retrieving token price change data, and executing swaps via the auxiliary Swap API.
-
-## Installation
-To integrate FuseBox Web SDK into your project, use npm:
-```bash
-npm install @fuseio/fusebox-web-sdk
-```
-
-## Getting Started
-1. Import FuseBox Web SDK
 ```javascript
 import { FuseSDK } from "@fuseio/fusebox-web-sdk";
-```
-2. Example Usage
+import { ethers } from 'ethers';
 
-`init`
+const apiKey = 'YOUR_PUBLIC_API_KEY';
+const credentials = new ethers.Wallet("PRIVATE_KEY");
+const fuseSDK = await FuseSDK.init(apiKey, credentials);
+```
+
+### Examples
+
+#### [Get Address](./example/address.ts)
+
+#### [Send transactions](./example/transfer.ts)
+
+#### [Send batch transactions](./example/batch.ts)
+
+#### [Staking](./example/stake_tokens.ts)
+
+#### [Unstake](./example/unstake_tokens.ts)
+
+#### [Trading](./example/swap_tokens.ts)
+
+
+## Features
+
+The FuseBox TS SDK provides several features that allow developers to create, manage, and engage with FuseBox TS SDK in their applications. Some of the key features include:
+
+#### Get Address
+
+Gets the address of the wallet created.
 
 ```javascript
-const main = async () => {
-  const credentials = new ethers.Wallet(process.env.<YOUR_PRIVATE_KEY>);
-  const publicApiKey = process.env.<YOUR_PUBLIC_API_KEY>;
-  const fuseSDK = await FuseSDK.init(publicApiKey, credentials);
-  const walletAddress = await fuseSDK.wallet.getSender();
-  console.log(`Sender Address is ${walletAddress}`);
-};
+console.log(`Smart contract wallet address: ${fuseSDK.wallet.getSender()}`);
 ```
 
-Ensure that `<YOUR_PRIVATE_KEY>` and `<YOUR_PUBLIC_API_KEY>` are replaced with your actual private key and public API key.
+#### Send transactions
 
-`callContract`
+Send transactions, including ERC20 and NFT transfers and interaction with arbitrary smart contracts.
 
 ```javascript
-const transfer = async () => {
-    //You can use ethers.Wallet.createRandom to create a new Wallet.
-    const credentials = new ethers.Wallet(process.env.<YOUR_PRIVATE_KEY>);
-    const publicApiKey = process.env.<YOUR_PUBLIC_API_KEY>;
-    const fuseSDK = await FuseSDK.init(publicApiKey, credentials, {
-      withPaymaster: true,
-    });
-
-    // You can use any other "to" address and any other "value"
-    const to = <RECEIVER_ADDRESS>;
-    const value = parseEther("0");
-    const data = Uint8Array.from([]);
-    const res = await fuseSDK.callContract(to, value, data);
-     
-    console.log(`UserOpHash: ${res?.userOpHash}`);
-    console.log("Waiting for transaction...");
-
-    const receipt = await res?.wait();
-    console.log("Transaction Hash:", receipt?.transactionHash);
-    };
+const tokenAddress = "YOUR_TOKEN";
+const to = "RECEIVER_ADDRESS";
+const amount = parseEther("0.001");
+const data = Uint8Array.from([]);
+const res = await fuseSDK.transferToken(
+  tokenAddress,
+  to,
+  amount,
+  data
+);
+console.log(`UserOpHash: ${res.userOpHash}`);
+console.log(`Waiting for transaction...`);
+const ev = await res.wait();
+console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash}`);
 ```
 
-## Available Methods
-`authenticate`- Authenticate a user using their private key and obtain a user token (JWT) for subsequent operations.
+#### Send batch transactions
 
-`init` - Initialize the FuseBox SDK with your API key.
+The process of grouping multiple transactions into a single batch to be processed together. This is often done to optimize processing time and reduce transaction fees.
 
-`callContract` - Call a method on a smart contract deployed on the Fuse Network.
+```javascript
+// Approve and transfer in a single batch
+const approveCallData = ContractUtils.encodeERC20ApproveCall(
+  spender,
+  amount
+) as unknown as Uint8Array;
 
-`executeBatch` - Execute a batch of transactions atomically.
+const calls = [
+  {
+    to: tokenAddress,
+    value: BigInt(0),
+    data: approveCallData,
+  },
+  {
+    to: spender,
+    value: BigInt(0),
+    data: callData,
+  },
+];
 
-`getBalance` - Retrieve the balance of a wallet.
+const res = await fuseSDK.executeBatch(calls, txOptions);
 
-`getAllowance` - Retrieve the allowance of a wallet.
+console.log(`UserOpHash: ${res.userOpHash}`);
 
-`getERC20TokenDetails` - Retrieve details about an ERC-20 token.
+console.log(`Waiting for transaction...`);
+const ev = await res.wait();
+console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash}`);
+```
 
-## Documentation
-For detailed information on each method and additional features, refer to the FuseBox Web SDK [Documentation](https://docs.fuse.io/docs/developers/fuse-box/fuse-sdk/).
+#### Sponsored Transactions
 
-## Support and Issues
-For support or to report issues, please visit the Fuse Community [Forum](https://forum.fuse.io/).
+Sponsored transactions are the ability to pay for another user’s transaction fees. To do this, the Fuse operator must enable the sponsored feature in his project and deposit some funds into the paymaster contract. The SDK provides a middleware to check if the project is sponsored and the amount of funds available for sponsoring.
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE.md) file for details.
+To use this feature, you must first initialize the SDK with the `withPaymaster` parameter set to `true`.
 
-This README provides a comprehensive overview of the FuseBox Web SDK. For in-depth information, consult the official [documentation](https://docs.fuse.io/docs/developers/fuse-box/fuse-sdk/).
+```javascript
+import { FuseSDK } from "@fuseio/fusebox-web-sdk";
+import { ethers } from 'ethers';
 
+const apiKey = 'YOUR_PUBLIC_API_KEY';
+const credentials = new ethers.Wallet("PRIVATE_KEY");
+const fuseSDK = await FuseSDK.init(apiKey, credentials, { withPaymaster: true });
+```
 
+#### Staking
+
+The SDK provides a module for staking. This module allows users to stake their tokens and earn rewards.
+
+Currently, the SDK supports staking for the following tokens: Native Fuse & VoltToken
+
+```javascript
+
+const stakingOptions = await fuseSDK.stakingModule.getStakingOptions(); // Get staking options
+
+const nativeTokenAddress = Variables.NATIVE_TOKEN_ADDRESS;
+const res = await fuseSDK.stakeToken(
+  new StakeRequestBody({
+    accountAddress: fuseSDK.wallet.getSender(),
+    tokenAmount: '0.01',
+    tokenAddress: nativeTokenAddress,
+  })
+);
+
+console.log(`UserOpHash: ${res?.userOpHash}`);
+console.log('Waiting for transaction...');
+const ev = await res?.wait();
+console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash}`);
+```
+
+#### Trading
+
+Smart Wallet can buy and sell popular cryptocurrencies like Bitcoin and Ethereum, Stable-coins. Behind the scenes, it uses [voltage.finance](https://voltage.finance/) decentralized exchange.
+
+```javascript
+const nativeTokenAddress = Variables.NATIVE_TOKEN_ADDRESS;
+const usdcTokenAddress = '0x28C3d1cD466Ba22f6cae51b1a4692a831696391A';
+const res = await fuseSDK.swapTokens(
+  new TradeRequestBody({
+    amountIn: '0.1',
+    currencyIn: nativeTokenAddress,
+    currencyOut: usdcTokenAddress,
+    recipient: fuseSDK.wallet.getSender(),
+  }),
+);
+
+console.log(`UserOpHash: ${res?.userOpHash}`);
+console.log('Waiting for transaction...');
+const ev = await res?.wait();
+console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash}`);
+```
+
+## Troubleshooting
+
+1. **User op cannot be replaced: fee too low.**
+
+   If you're getting the `User op cannot be replaced: fee too low` error, it means that the gas price you set is too low. You can increase the gas price by setting the `TxOptions` parameter when sending a transaction. To replace an user operation, a new user operation must have at least 10% higher `maxPriorityFeePerGas` and 10% higher `maxPriorityFeePerGas` than the one in the user operation mempool.
+
+To replace the user operation, the new gas price must be at least 10% higher.
+
+```javascript
+const tokenAddress = "YOUR_TOKEN";
+const to = "RECEIVER_ADDRESS";
+const amount = parseEther("0.001");
+const data = Uint8Array.from([]);
+
+const res = await fuseSDK.transferToken(
+  tokenAddress,
+  to,
+  amount,
+  data,
+  {
+    withRetry: true,
+    feeIncrementPercentage: 11,
+  }
+);
+console.log(`UserOpHash: ${res.userOpHash}`);
+console.log(`Waiting for transaction...`);
+const ev = await res.wait();
+console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash}`);
+```
+
+## Limitations
+
+The FuseBox TS SDK works only on the Fuse & Fuse Sparknet networks, an EVM based chain L1 blockchain. Support for other blockchains is planned for the future.
+
+If you have any questions or feedback, please get in touch with our support team at support@fuse.io.
