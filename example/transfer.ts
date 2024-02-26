@@ -21,7 +21,7 @@ const main = async () => {
   console.log('Waiting for transaction...');
 
   const receipt = await res?.wait();
-  console.log('Transaction Hash:', receipt?.transactionHash);
+  console.log(`Transaction hash: https://explorer.fuse.io/tx/${receipt?.transactionHash}`);
 };
 
 main();

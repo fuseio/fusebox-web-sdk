@@ -1,6 +1,9 @@
 import { Address } from "./address";
 import { Collection } from "./collection";
 
+/**
+ * Interface representing a collectible item with various properties including metadata.
+ */
 export interface ICollectible {
   description?: string;
   name?: string;
@@ -13,6 +16,9 @@ export interface ICollectible {
   creator: Address;
 }
 
+/**
+ * Represents a unique item or asset in a collection.
+ */
 export class Collectible implements ICollectible {
   description?: string;
   name?: string;
@@ -24,6 +30,10 @@ export class Collectible implements ICollectible {
   owner: Address;
   creator: Address;
 
+  /**
+   * Constructs a new Collectible instance.
+   * @param {ICollectible} param0 - Object containing the collectible item's properties.
+   */
   constructor({
     description,
     name,
@@ -46,6 +56,10 @@ export class Collectible implements ICollectible {
     this.creator = creator;
   }
 
+  /**
+   * Decodes the descriptor URI to retrieve metadata.
+   * @returns {object | null} The decoded metadata or null if decoding fails.
+   */
   decodeDescriptorUri(): object | null {
     if (this.descriptorUri.startsWith('data:application/json')) {
       const base64Content = this.descriptorUri.split(',').pop();
@@ -57,7 +71,10 @@ export class Collectible implements ICollectible {
     return null;
   }
 
-  // Getter method to retrieve the image URL either directly or from decoded metadata
+  /**
+   * Getter method to retrieve the image URL either directly or from decoded metadata.
+   * @returns {string | null} The image URL or null if not available.
+   */
   get image(): string | null {
     if (this.imageURL) {
       return this.imageURL;
@@ -70,7 +87,11 @@ export class Collectible implements ICollectible {
     return null;
   }
 
-  // Method to create an instance from JSON
+  /**
+   * Creates a Collectible instance from a JSON object.
+   * @param {any} json - JSON object containing the collectible data.
+   * @returns {Collectible} A new Collectible instance.
+   */
   static fromJson(json: any): Collectible {
     return new Collectible({
       ...json,

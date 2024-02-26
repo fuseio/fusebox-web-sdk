@@ -5,7 +5,7 @@ import { AuthDto } from '../types/auth/auth.dto';
 export class SmartWalletAuth {
   /**
    * Authenticates the user using the provided private key
-   * @param {ethers.Signer} credentials are the Ethereum private key credentials.
+   * @param {ethers.Signer} credentials are the private key credentials.
    * @param {string} smartWalletAddress is the address of the smart wallet to authenticate.
    * @returns  AuthDto, containing the hash, ownerAddress and signature of the authenticated wallet.
    */

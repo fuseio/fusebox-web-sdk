@@ -1,14 +1,35 @@
+/**
+ * Interface for trade details.
+ */
 export interface ITrade {
+  /** The amount of input token. */
   inputAmount: string;
+
+  /** The amount of output token. */
   outputAmount: string;
+
+  /** A list of strings representing the route of the trade. */
   route: string[];
+
+  /** The input token of the trade.. */
   inputToken: string;
+
+  /** The output token of the trade. */
   outputToken: string;
+
+  /** The execution price of the trade. */
   executionPrice: string;
+
+  /** The next mid price of the trade. */
   nextMidPrice: string;
+
+  /** The price impact of the trade. */
   priceImpact: string;
 }
 
+/**
+ * Class representing a trade.
+ */
 export class Trade implements ITrade {
   inputAmount: string;
   outputAmount: string;
@@ -19,6 +40,10 @@ export class Trade implements ITrade {
   nextMidPrice: string;
   priceImpact: string;
 
+  /**
+   * Creates an instance of a trade.
+   * @param params - The trade parameters.
+   */
   constructor({
     inputAmount,
     outputAmount,
@@ -39,6 +64,11 @@ export class Trade implements ITrade {
     this.priceImpact = priceImpact;
   }
 
+  /**
+   * Creates a new trade instance from a JSON object.
+   * @param json - Partial JSON representation of a trade.
+   * @returns A new Trade instance.
+   */
   static fromJson(json: Partial<Trade>): Trade {
     return new Trade({
       inputAmount: json.inputAmount ?? '',
@@ -52,6 +82,10 @@ export class Trade implements ITrade {
     });
   }
 
+  /**
+   * Converts the trade instance to a JSON object.
+   * @returns The JSON representation of the trade.
+   */
   toJson(): object {
     return {
       inputAmount: this.inputAmount,
