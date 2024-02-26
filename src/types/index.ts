@@ -5,5 +5,6 @@ export * from './collectible';
 export * from './collection';
 export * from './enum';
 export * from './staking';
-export * from './token/token';
-export * from './trade/index';
+export * from './token';
+export * from './trade';
+export * from './wallet_action';
