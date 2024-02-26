@@ -14,7 +14,7 @@ import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 import { SmartWalletAuth } from './utils/auth';
 import { ContractUtils } from './utils/contracts';
 import { Variables } from './constants/variables';
-import { ERC20, Native, parseTokenDetails } from './types/token/token_details';
+import { ERC20, Native, parseTokenDetails, WalletActionResult } from './types';
 import { NonceManager } from './utils/nonceManager';
 import { ExplorerModule, NftModule, StakingModule, TradeModule } from './modules';
 import { TradeRequestBody, UnstakeRequestBody } from './types';
@@ -59,7 +59,7 @@ export class FuseSDK {
   /**
    * Initializes the SDK.
    * @param publicApiKey is required to authenticate with the Fuse API.
-   * @param credentials are the Ethereum private key credentials.
+   * @param credentials are the private key credentials.
    * @param withPaymaster indicates if the paymaster should be used.
    * @param paymasterContext provides additional context for the paymaster.
    * @param opts are the preset builder options.
@@ -266,7 +266,7 @@ export class FuseSDK {
 
   /**
    * Authenticates the user using the provided private key
-   * @param credentials are the Ethereum private key credentials.
+   * @param credentials are the private key credentials.
    * @returns JWT token upon successful authentication.
    */
   async authenticate(credentials: ethers.Signer): Promise<string> {
@@ -278,7 +278,7 @@ export class FuseSDK {
 
   /**
    * Initializes the wallet with the provided parameters.
-   * @param credentials are the Ethereum private key credentials.
+   * @param credentials are the private key credentials.
    * @param publicApiKey is required to authenticate with the Fuse API.
    * @param opts are the preset builder options.
    * @param paymasterMiddleware is the middleware for the paymaster.
@@ -482,6 +482,46 @@ export class FuseSDK {
     ) as unknown as Uint8Array;
 
     return this.callContract(nftContractAddress, BigInt(0), transferCallData, txOptions);
+  }
+
+  /**
+   * Retrieves historical actions for a smart wallet, with optional filtering by token address and update time.
+   * 
+   * @param page The page number to retrieve, default is 1.
+   * @param limit Number of items in each page, default is 10.
+   * @param tokenAddress Filter actions related to the specified token address.
+   * @returns A promise that resolves with a WalletActionResult object containing the historical wallets actions.
+   */
+  async getWalletActions({
+    page = 1,
+    limit = 10,
+    tokenAddress,
+  }: {
+    page?: number;
+    limit?: number;
+    tokenAddress?: string;
+  }): Promise<WalletActionResult> {
+    const queryParameters: Record<string, any> = {
+      page,
+      limit,
+    };
+
+    if (tokenAddress !== undefined) {
+      queryParameters.tokenAddress = tokenAddress;
+    }
+
+    try {
+      const response = await this._axios.get('/v2/smart-wallets/actions', {
+        params: queryParameters,
+        headers: {
+          Authorization: `Bearer ${this._jwtToken}`,
+        },
+      });
+
+      return WalletActionResult.fromJson(response.data);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
