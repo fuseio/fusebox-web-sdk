@@ -8,3 +8,4 @@ export * from './staking';
 export * from './token';
 export * from './trade';
 export * from './wallet_action';
+export * from './user_op/user_op';
