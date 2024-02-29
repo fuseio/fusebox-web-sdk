@@ -49,6 +49,7 @@ The SDK is designed to make it easy for developers to create, manage, and engage
 import { FuseSDK } from "@fuseio/fusebox-web-sdk";
 import { ethers } from 'ethers';
 
+// Create a project: https://console.fuse.io/build
 const apiKey = 'YOUR_PUBLIC_API_KEY';
 const credentials = new ethers.Wallet("PRIVATE_KEY");
 const fuseSDK = await FuseSDK.init(apiKey, credentials);
