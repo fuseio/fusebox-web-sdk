@@ -3,6 +3,7 @@ import {
   IPresetBuilderOpts,
   UserOperationBuilder,
   UserOperationMiddlewareFn,
+  EOASigner,
 } from 'userop';
 import { BigNumberish, BytesLike, ethers } from 'ethers';
 import { ICall } from 'userop';
@@ -18,7 +19,7 @@ import {
 import { Variables } from './constants/variables';
 
 export class EtherspotWallet extends UserOperationBuilder {
-  private signer: ethers.Signer;
+  private signer: EOASigner;
   private provider: ethers.providers.JsonRpcProvider;
   private entryPoint: EntryPoint;
   private factory: EtherspotWalletFactory;
@@ -26,7 +27,7 @@ export class EtherspotWallet extends UserOperationBuilder {
   proxy: EtherspotWalletContract;
   nonceKey: number;
 
-  private constructor(signer: ethers.Signer, rpcUrl: string, opts?: IPresetBuilderOpts) {
+  private constructor(signer: EOASigner, rpcUrl: string, opts?: IPresetBuilderOpts) {
     super();
     this.signer = signer;
     this.provider = new BundlerJsonRpcProvider(rpcUrl).setBundlerRpc(opts?.overrideBundlerRpc);
@@ -55,7 +56,7 @@ export class EtherspotWallet extends UserOperationBuilder {
 
   /// Initializes a EtherspotWallet object and returns it.
   public static async init(
-    signer: ethers.Signer,
+    signer: EOASigner,
     rpcUrl: string,
     opts?: IPresetBuilderOpts,
     signature?: string,
