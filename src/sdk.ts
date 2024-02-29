@@ -28,6 +28,8 @@ import { TradeRequestBody, UnstakeRequestBody } from './types';
 import { parseUnits } from 'ethers/lib/utils';
 
 export class FuseSDK {
+  static init;
+  static authenticate;
   private readonly _axios: AxiosInstance;
   private readonly _feeTooLowError = 'fee too low';
   private _jwtToken!: string;
