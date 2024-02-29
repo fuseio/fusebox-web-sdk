@@ -1,6 +1,6 @@
 // src/sdk.test.ts
 
-import { FuseSDK, EtherspotWallet, Client, TradeModule, ExplorerModule, StakingModule, NftModule, GraphQLModule, NonceManager, ContractUtils, Variables, BigNumber, ethers, AxiosInstance } from './sdk';
+import { FuseSDK } from './sdk';
 
 describe('FuseSDK', () => {
   describe('init', () => {
