@@ -1,9 +1,6 @@
 // src/utils/auth.test.ts
 
-import { ethers } from 'ethers';
-import { AuthDto } from '../types/auth/auth.dto';
-import { EOASigner } from 'userop';
-import { SmartWalletAuth } from './auth';
+import { SmartWalletAuth, AuthDto, EOASigner } from './auth';
 
 describe('SmartWalletAuth', () => {
   describe('signer', () => {
