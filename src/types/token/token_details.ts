@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js"
+
 /**
  * Interface representing a token with basic properties.
  */
@@ -22,7 +24,7 @@ export function nameFromJson(tokenName: string): string {
  * @returns The bigint representation.
  */
 export function amountFromJson(value: string | null): bigint {
-  return value ? BigInt(value) : BigInt(0);
+  return value !== null ? BigInt(new BigNumber(value).toString()) : BigInt(0);
 }
 
 /**

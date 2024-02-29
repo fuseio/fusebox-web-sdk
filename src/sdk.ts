@@ -16,7 +16,13 @@ import { ContractUtils } from './utils/contracts';
 import { Variables } from './constants/variables';
 import { ERC20, Native, parseTokenDetails, WalletActionResult } from './types';
 import { NonceManager } from './utils/nonceManager';
-import { ExplorerModule, NftModule, StakingModule, TradeModule } from './modules';
+import {
+  ExplorerModule,
+  NftModule,
+  StakingModule,
+  TradeModule,
+  GraphQLModule
+} from './modules';
 import { TradeRequestBody, UnstakeRequestBody } from './types';
 import { parseUnits } from 'ethers/lib/utils';
 
@@ -30,6 +36,7 @@ export class FuseSDK {
   public explorerModule!: ExplorerModule;
   public stakingModule!: StakingModule;
   public nftModule!: NftModule;
+  public graphQLModule!: GraphQLModule;
   private _nonceManager!: NonceManager;
 
   constructor(
@@ -54,6 +61,7 @@ export class FuseSDK {
     this.explorerModule = new ExplorerModule(this._axios);
     this.stakingModule = new StakingModule(this._axios);
     this.nftModule = new NftModule(this._axios);
+    this.graphQLModule = new GraphQLModule(this._axios);
   }
 
   /**

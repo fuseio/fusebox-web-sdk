@@ -35,6 +35,7 @@
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
     "axios": "^1.5.1",
+    "bignumber.js": "^9.1.2",
     "ethers": "^5.5.2",
     "userop": "^0.3.7"
   }
