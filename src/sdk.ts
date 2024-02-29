@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import ethers, { BigNumber, BigNumberish } from 'ethers';
 import {
   Client,
+  EOASigner,
   ICall,
   IClientOpts,
   IPresetBuilderOpts,
@@ -76,7 +77,7 @@ export class FuseSDK {
    */
   static async init(
     publicApiKey: string,
-    credentials: ethers.Signer,
+    credentials: EOASigner,
     {
       withPaymaster,
       paymasterContext,
@@ -277,7 +278,7 @@ export class FuseSDK {
    * @param credentials are the private key credentials.
    * @returns JWT token upon successful authentication.
    */
-  async authenticate(credentials: ethers.Signer): Promise<string> {
+  async authenticate(credentials: EOASigner): Promise<string> {
     const auth = await SmartWalletAuth.signer(credentials, this.wallet.getSender());
     const response = await this._axios.post('/v2/smart-wallets/auth', auth.toJson());
     this._jwtToken = response.data.jwt;
@@ -293,7 +294,7 @@ export class FuseSDK {
    * @returns
    */
   private static async _initializeWallet(
-    credentials: ethers.Signer,
+    credentials: EOASigner,
     publicApiKey: string,
     baseUrl: string,
     opts?: IPresetBuilderOpts,
