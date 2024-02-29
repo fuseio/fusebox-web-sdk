@@ -1,16 +1,17 @@
 import { ethers } from 'ethers';
 import { AuthDto } from '../types/auth/auth.dto';
+import { EOASigner } from 'userop';
 
 /// Class for handling authentication processes for Fuse Smart Wallets.
 export class SmartWalletAuth {
   /**
    * Authenticates the user using the provided private key
-   * @param {ethers.Signer} credentials are the private key credentials.
+   * @param {EOASigner} credentials are the private key credentials.
    * @param {string} smartWalletAddress is the address of the smart wallet to authenticate.
    * @returns  AuthDto, containing the hash, ownerAddress and signature of the authenticated wallet.
    */
   public static signer = async (
-    credentials: ethers.Signer,
+    credentials: EOASigner,
     smartWalletAddress?: string
   ): Promise<AuthDto> => {
     const ownerAddress = await credentials.getAddress();
