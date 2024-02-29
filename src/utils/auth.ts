@@ -11,7 +11,7 @@ export class SmartWalletAuth {
    * @returns  AuthDto, containing the hash, ownerAddress and signature of the authenticated wallet.
    */
   public static signer = async (
-    credentials: EOASigner,
+    credentials: any,
     smartWalletAddress?: string
   ): Promise<AuthDto> => {
     const ownerAddress = await credentials.getAddress();
