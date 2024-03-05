@@ -45,7 +45,7 @@ The SDK is designed to make it easy for developers to create, manage, and engage
 
 ## Instantiation
 
-```javascript
+```typescript
 import { FuseSDK } from "@fuseio/fusebox-web-sdk";
 import { ethers } from 'ethers';
 
@@ -78,7 +78,7 @@ The FuseBox TS SDK provides several features that allow developers to create, ma
 
 Gets the address of the wallet created.
 
-```javascript
+```typescript
 console.log(`Smart contract wallet address: ${fuseSDK.wallet.getSender()}`);
 ```
 
@@ -86,7 +86,7 @@ console.log(`Smart contract wallet address: ${fuseSDK.wallet.getSender()}`);
 
 Send transactions, including ERC20 and NFT transfers and interaction with arbitrary smart contracts.
 
-```javascript
+```typescript
 const tokenAddress = "YOUR_TOKEN";
 const to = "RECEIVER_ADDRESS";
 const amount = parseEther("0.001");
@@ -107,7 +107,7 @@ console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash
 
 The process of grouping multiple transactions into a single batch to be processed together. This is often done to optimize processing time and reduce transaction fees.
 
-```javascript
+```typescript
 // Approve and transfer in a single batch
 const approveCallData = ContractUtils.encodeERC20ApproveCall(
   spender,
@@ -142,7 +142,7 @@ Sponsored transactions are the ability to pay for another user’s transaction f
 
 To use this feature, you must first initialize the SDK with the `withPaymaster` parameter set to `true`.
 
-```javascript
+```typescript
 import { FuseSDK } from "@fuseio/fusebox-web-sdk";
 import { ethers } from 'ethers';
 
@@ -157,7 +157,7 @@ The SDK provides a module for staking. This module allows users to stake their t
 
 Currently, the SDK supports staking for the following tokens: Native Fuse & VoltToken
 
-```javascript
+```typescript
 
 const stakingOptions = await fuseSDK.stakingModule.getStakingOptions(); // Get staking options
 
@@ -180,16 +180,16 @@ console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash
 
 Smart Wallet can buy and sell popular cryptocurrencies like Bitcoin and Ethereum, Stable-coins. Behind the scenes, it uses [voltage.finance](https://voltage.finance/) decentralized exchange.
 
-```javascript
+```typescript
 const nativeTokenAddress = Variables.NATIVE_TOKEN_ADDRESS;
 const usdcTokenAddress = '0x28C3d1cD466Ba22f6cae51b1a4692a831696391A';
 const res = await fuseSDK.swapTokens(
-  new TradeRequestBody({
-    amountIn: '0.1',
-    currencyIn: nativeTokenAddress,
-    currencyOut: usdcTokenAddress,
-    recipient: fuseSDK.wallet.getSender(),
-  }),
+  new TradeRequest(
+    nativeTokenAddress,
+    usdcTokenAddress,
+    parseUnits('1', 18),
+    true,
+  ),
 );
 
 console.log(`UserOpHash: ${res?.userOpHash}`);
@@ -206,7 +206,7 @@ console.log(`Transaction hash: https://explorer.fuse.io/tx/${ev?.transactionHash
 
 To replace the user operation, the new gas price must be at least 10% higher.
 
-```javascript
+```typescript
 const tokenAddress = "YOUR_TOKEN";
 const to = "RECEIVER_ADDRESS";
 const amount = parseEther("0.001");
