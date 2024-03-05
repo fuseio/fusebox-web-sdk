@@ -1,5 +1,6 @@
 import { BigNumberish, ethers } from 'ethers';
 import { ABI } from '../constants/abis';
+import { Variables } from '../constants/variables';
 
 /**
  * A utility class providing methods to interact with contracts.
@@ -61,6 +62,14 @@ export class ContractUtils {
   public static encodeERC20TransferCall(recipient: string, amount: BigNumberish): string {
     const iface = new ethers.utils.Interface(ABI.get('ERC20'));
     return iface.encodeFunctionData('transfer', [recipient, amount]);
+  }
+
+  /**
+ * Checks if the given address is the native token's address.
+ * @param tokenAddress is the address to be checked.
+ */
+  public static isNativeToken(tokenAddress: string): boolean {
+    return tokenAddress.toLowerCase() === Variables.NATIVE_TOKEN_ADDRESS.toLowerCase();
   }
 
   /**

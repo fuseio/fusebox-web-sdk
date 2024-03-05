@@ -15,7 +15,14 @@ import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 import { SmartWalletAuth } from './utils/auth';
 import { ContractUtils } from './utils/contracts';
 import { Variables } from './constants/variables';
-import { ERC20, Native, parseTokenDetails, WalletActionResult } from './types';
+import {
+  ERC20,
+  Native,
+  parseTokenDetails,
+  TradeRequest,
+  WalletActionResult,
+  UnstakeRequestBody
+} from './types';
 import { NonceManager } from './utils/nonceManager';
 import {
   ExplorerModule,
@@ -24,7 +31,6 @@ import {
   TradeModule,
   GraphQLModule
 } from './modules';
-import { TradeRequestBody, UnstakeRequestBody } from './types';
 import { parseUnits } from 'ethers/lib/utils';
 
 export class FuseSDK {
@@ -209,7 +215,7 @@ export class FuseSDK {
    * @returns BigInt representing the balance of the address for the specified token.
    */
   async getBalance(tokenAddress: string, address: string) {
-    if (this._isNativeToken(tokenAddress)) {
+    if (ContractUtils.isNativeToken(tokenAddress)) {
       return await this._getNativeBalance(address);
     }
     return ContractUtils.readFromContractWithFirstResult(
@@ -251,7 +257,7 @@ export class FuseSDK {
    * @returns a ERC20 object containing the token's name, symbol, decimals, and other relevant details.
    */
   async getERC20TokenDetails(tokenAddress: string) {
-    if (this._isNativeToken(tokenAddress)) {
+    if (ContractUtils.isNativeToken(tokenAddress)) {
       return new Native({ amount: BigInt(0) });
     }
     const toRead = ['name', 'symbol', 'decimals'];
@@ -343,14 +349,6 @@ export class FuseSDK {
   }
 
   /**
-   * Checks if the given address is the native token's address.
-   * @param tokenAddress is the address to be checked.
-   */
-  private _isNativeToken(tokenAddress: string): boolean {
-    return tokenAddress.toLowerCase() === Variables.NATIVE_TOKEN_ADDRESS.toLowerCase();
-  }
-
-  /**
    * Increases the transaction fee by a specified percentage.
    * @param fees are the fees to be set.
    * @param percentage is the percentage by which the fees should be increased.
@@ -410,7 +408,7 @@ export class FuseSDK {
     amount?: BigNumberish,
     txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
-    if (this._isNativeToken(tokenAddress)) {
+    if (ContractUtils.isNativeToken(tokenAddress)) {
       return this.callContract(spender, amount ?? 0, callData, txOptions);
     }
 
@@ -458,7 +456,7 @@ export class FuseSDK {
     txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ) {
     data = data ?? new Uint8Array(0);
-    if (this._isNativeToken(tokenAddress)) {
+    if (ContractUtils.isNativeToken(tokenAddress)) {
       return this.callContract(recipientAddress, amount, data, txOptions);
     } else {
       const transferCallData = ContractUtils.encodeERC20TransferCall(
@@ -621,26 +619,23 @@ export class FuseSDK {
   }
 
   /**
-   * Swaps tokens based on the provided [tradeRequestBody].
+   * Swaps tokens based on the provided [tradeRequest].
    *
    * This method facilitates token swaps by interacting with the trade module.
-   * @param tradeRequestBody contains details about the token swap, such as the input and output tokens.
+   * @param tradeRequest contains details about the token swap, such as the input and output tokens.
    * @param options provides additional transaction options.
    * @returns 
    */
-  async swapTokens(tradeRequestBody: TradeRequestBody, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
-    const data = await this.tradeModule.requestParameters(tradeRequestBody);
-    const spender = data.rawTxn['to'];
-    const callData = data.rawTxn['data'];
-    const { amountIn, currencyIn } = tradeRequestBody;
-    const { decimals } = await this.getERC20TokenDetails(currencyIn);
-    const amount = parseUnits(amountIn, decimals.toString());
+  async swapTokens(tradeRequest: TradeRequest, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
+    const tradeData = await this.tradeModule.quote(tradeRequest);
+    const spender = tradeData.to;
+    const callData = tradeData.data as unknown as Uint8Array;
 
     return this._processOperation(
-      currencyIn,
+      tradeData.sellTokenAddress,
       spender,
       callData,
-      amount,
+      tradeRequest.inputAmount,
       txOptions
     );
   }
