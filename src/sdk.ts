@@ -15,7 +15,14 @@ import { verifyingPaymaster } from 'userop/dist/preset/middleware';
 import { SmartWalletAuth } from './utils/auth';
 import { ContractUtils } from './utils/contracts';
 import { Variables } from './constants/variables';
-import { ERC20, Native, parseTokenDetails, TradeRequest, WalletActionResult } from './types';
+import {
+  ERC20,
+  Native,
+  parseTokenDetails,
+  TradeRequest,
+  WalletActionResult,
+  UnstakeRequestBody
+} from './types';
 import { NonceManager } from './utils/nonceManager';
 import {
   ExplorerModule,
@@ -24,7 +31,6 @@ import {
   TradeModule,
   GraphQLModule
 } from './modules';
-import { UnstakeRequestBody } from './types';
 import { parseUnits } from 'ethers/lib/utils';
 
 export class FuseSDK {
