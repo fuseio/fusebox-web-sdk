@@ -4,9 +4,8 @@ import {
   IToken,
   IntervalStats,
   TimeFrame,
-  Trade,
-  TradeCallParameters,
-  TradeRequestBody,
+  TradeData,
+  TradeRequest,
   parseTokenDetails
 } from '../types';
 
@@ -21,34 +20,16 @@ export class TradeModule {
   }
 
   /**
-   * Fetches the parameters required for a trade request.
-   * @param tradeRequestBody - The trade request body.
-   * @returns A promise that resolves to the trade call parameters.
-   * @throws If an error occurs during the request.
-   */
-  async requestParameters(tradeRequestBody: TradeRequestBody): Promise<TradeCallParameters> {
-    try {
-      const response = await this._axios.post('/v0/trade/swap/requestparameters', tradeRequestBody);
-      if (response.status === 201) {
-        return TradeCallParameters.fromJson(response.data);
-      }
-      throw response;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
    * Get a quote for a trade request.
-   * @param tradeRequestBody - The trade request body.
+   * @param tradeRequest - The trade request body.
    * @returns A promise that resolves to the trade quote.
    * @throws If an error occurs during the request.
    */
-  async quote(tradeRequestBody: TradeRequestBody): Promise<Trade> {
+  async quote(tradeRequest: TradeRequest): Promise<TradeData> {
     try {
-      const response = await this._axios.post('/v0/trade/swap/quote', tradeRequestBody);
-      if (response.status === 201) {
-        return Trade.fromJson(response.data['data']['info']);
+      const response = await this._axios.get('/v1/trade/quote', { params: tradeRequest.getParams() });
+      if (response.status === 200) {
+        return TradeData.fromJson(response.data);
       }
       throw new Error('Failed to get quote');
     } catch (error) {
