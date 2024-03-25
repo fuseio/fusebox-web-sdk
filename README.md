@@ -89,7 +89,7 @@ Send transactions, including ERC20 and NFT transfers and interaction with arbitr
 ```typescript
 const tokenAddress = "YOUR_TOKEN";
 const to = "RECEIVER_ADDRESS";
-const amount = parseUnits('10000', DECIMAL); //Amount should be WEI valued. `DECIMAL` should be a numeric value
+const amount = parseUnits('10000', DECIMAL); //Amount should be set in WEI. `DECIMAL` should be a numeric value
 const data = Uint8Array.from([]);
 const res = await fuseSDK.transferToken(
   tokenAddress,
@@ -209,7 +209,7 @@ To replace the user operation, the new gas price must be at least 10% higher.
 ```typescript
 const tokenAddress = "YOUR_TOKEN";
 const to = "RECEIVER_ADDRESS";
-const amount = parseUnits('10000', DECIMAL); //Amount should be WEI valued. `DECIMAL` should be a numeric value
+const amount = parseUnits('10000', DECIMAL); //Amount should be set in WEI. `DECIMAL` should be a numeric value
 const data = Uint8Array.from([]);
 
 const res = await fuseSDK.transferToken(
