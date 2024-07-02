@@ -142,8 +142,6 @@ export class FuseSDK {
     txOptions?: typeof Variables.DEFAULT_TX_OPTIONS,
   ): Promise<ISendUserOperationResponse | null | undefined> {
     txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
-    const initialFees = BigInt(txOptions.feePerGas);
-    this.setWalletFees(initialFees);
 
     if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
@@ -155,8 +153,10 @@ export class FuseSDK {
       return await this.client.sendUserOperation(userOp);
     } catch (e: any) {
       if (txOptions.withRetry && e.message.includes(this._feeTooLowError)) {
+        // Use eip1559 as soon as it's available on Fuse
+        const gasPrices = await this._fetchLegacyGasPrice();
         const increasedFees = this._increaseFeeByPercentage(
-          initialFees,
+          gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
         );
         this.setWalletFees(increasedFees);
@@ -377,15 +377,16 @@ export class FuseSDK {
     txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ): Promise<ISendUserOperationResponse | null | undefined> {
     txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
-    const initialFees = BigInt(txOptions.feePerGas);
-    this.setWalletFees(initialFees);
+
     try {
       const userOp = this.wallet.execute(call.to, call.value, call.data);
       return await this.client.sendUserOperation(userOp);
     } catch (e: any) {
       if (e.message.includes(this._feeTooLowError) && txOptions.withRetry) {
+        // Use eip1559 as soon as it's available on Fuse
+        const gasPrices = await this._fetchLegacyGasPrice();
         const increasedFees = this._increaseFeeByPercentage(
-          initialFees,
+          gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
         );
         this.setWalletFees(increasedFees);
@@ -398,6 +399,15 @@ export class FuseSDK {
       } else {
         throw e;
       }
+    }
+  }
+
+  async _fetchLegacyGasPrice() {
+    const gas = await this.wallet.proxy.provider.getGasPrice();
+
+    return {
+      maxFeePerGas: gas,
+      maxPriorityFeePerGas: gas
     }
   }
 
