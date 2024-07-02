@@ -1,6 +1,6 @@
 {
   "name": "@fuseio/fusebox-web-sdk",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Fuse Wallet SDK now has a JS implementation, making it even easier to integrate blockchain technology into your mobile apps.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
