@@ -154,7 +154,7 @@ export class FuseSDK {
     } catch (e: any) {
       if (txOptions.withRetry && e.message.includes(this._feeTooLowError)) {
         // Use eip1559 as soon as it's available on Fuse
-        const gasPrices = await this._fetchLegacyGasPrice();
+        const gasPrices = await this._fetchGasPrice();
         const increasedFees = this._increaseFeeByPercentage(
           gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
@@ -384,7 +384,7 @@ export class FuseSDK {
     } catch (e: any) {
       if (e.message.includes(this._feeTooLowError) && txOptions.withRetry) {
         // Use eip1559 as soon as it's available on Fuse
-        const gasPrices = await this._fetchLegacyGasPrice();
+        const gasPrices = await this._fetchGasPrice();
         const increasedFees = this._increaseFeeByPercentage(
           gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
@@ -402,12 +402,15 @@ export class FuseSDK {
     }
   }
 
-  async _fetchLegacyGasPrice() {
-    const gas = await this.wallet.proxy.provider.getGasPrice();
+  async _fetchGasPrice() {
+    const {
+      maxFeePerGas,
+      maxPriorityFeePerGas
+    } = await this.wallet.proxy.provider.getFeeData();
 
     return {
-      maxFeePerGas: gas,
-      maxPriorityFeePerGas: gas
+      maxFeePerGas: maxFeePerGas!,
+      maxPriorityFeePerGas: maxPriorityFeePerGas!
     }
   }
 
