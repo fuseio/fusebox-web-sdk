@@ -26,10 +26,10 @@ import {
 import { NonceManager } from './utils/nonceManager';
 import {
   ExplorerModule,
-  NftModule,
   StakingModule,
   TradeModule,
-  GraphQLModule
+  GraphQLModule,
+  BalancesModule
 } from './modules';
 import { parseUnits } from 'ethers/lib/utils';
 
@@ -42,7 +42,7 @@ export class FuseSDK {
   public tradeModule!: TradeModule;
   public explorerModule!: ExplorerModule;
   public stakingModule!: StakingModule;
-  public nftModule!: NftModule;
+  public balancesModule!: BalancesModule;
   public graphQLModule!: GraphQLModule;
   private _nonceManager!: NonceManager;
 
@@ -67,7 +67,7 @@ export class FuseSDK {
     this.tradeModule = new TradeModule(this._axios);
     this.explorerModule = new ExplorerModule(this._axios);
     this.stakingModule = new StakingModule(this._axios);
-    this.nftModule = new NftModule(this._axios);
+    this.balancesModule = new BalancesModule(this._axios);
     this.graphQLModule = new GraphQLModule(this._axios);
   }
 
@@ -142,8 +142,6 @@ export class FuseSDK {
     txOptions?: typeof Variables.DEFAULT_TX_OPTIONS,
   ): Promise<ISendUserOperationResponse | null | undefined> {
     txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
-    const initialFees = BigInt(txOptions.feePerGas);
-    this.setWalletFees(initialFees);
 
     if (txOptions?.useNonceSequence) {
       this._nonceManager.increment();
@@ -155,8 +153,10 @@ export class FuseSDK {
       return await this.client.sendUserOperation(userOp);
     } catch (e: any) {
       if (txOptions.withRetry && e.message.includes(this._feeTooLowError)) {
+        // Use eip1559 as soon as it's available on Fuse
+        const gasPrices = await this._fetchGasPrice();
         const increasedFees = this._increaseFeeByPercentage(
-          initialFees,
+          gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
         );
         this.setWalletFees(increasedFees);
@@ -377,15 +377,16 @@ export class FuseSDK {
     txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
   ): Promise<ISendUserOperationResponse | null | undefined> {
     txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
-    const initialFees = BigInt(txOptions.feePerGas);
-    this.setWalletFees(initialFees);
+
     try {
       const userOp = this.wallet.execute(call.to, call.value, call.data);
       return await this.client.sendUserOperation(userOp);
     } catch (e: any) {
       if (e.message.includes(this._feeTooLowError) && txOptions.withRetry) {
+        // Use eip1559 as soon as it's available on Fuse
+        const gasPrices = await this._fetchGasPrice();
         const increasedFees = this._increaseFeeByPercentage(
-          initialFees,
+          gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
         );
         this.setWalletFees(increasedFees);
@@ -398,6 +399,18 @@ export class FuseSDK {
       } else {
         throw e;
       }
+    }
+  }
+
+  async _fetchGasPrice() {
+    const {
+      maxFeePerGas,
+      maxPriorityFeePerGas
+    } = await this.wallet.proxy.provider.getFeeData();
+
+    return {
+      maxFeePerGas: maxFeePerGas!,
+      maxPriorityFeePerGas: maxPriorityFeePerGas!
     }
   }
 
