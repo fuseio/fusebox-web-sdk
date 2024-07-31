@@ -26,10 +26,10 @@ import {
 import { NonceManager } from './utils/nonceManager';
 import {
   ExplorerModule,
-  NftModule,
   StakingModule,
   TradeModule,
-  GraphQLModule
+  GraphQLModule,
+  BalancesModule
 } from './modules';
 import { parseUnits } from 'ethers/lib/utils';
 
@@ -42,7 +42,7 @@ export class FuseSDK {
   public tradeModule!: TradeModule;
   public explorerModule!: ExplorerModule;
   public stakingModule!: StakingModule;
-  public nftModule!: NftModule;
+  public balancesModule!: BalancesModule;
   public graphQLModule!: GraphQLModule;
   private _nonceManager!: NonceManager;
 
@@ -67,7 +67,7 @@ export class FuseSDK {
     this.tradeModule = new TradeModule(this._axios);
     this.explorerModule = new ExplorerModule(this._axios);
     this.stakingModule = new StakingModule(this._axios);
-    this.nftModule = new NftModule(this._axios);
+    this.balancesModule = new BalancesModule(this._axios);
     this.graphQLModule = new GraphQLModule(this._axios);
   }
 

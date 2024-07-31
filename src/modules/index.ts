@@ -1,3 +1,4 @@
+export * from './balances';
 export * from './explorer';
 export * from './graphql';
 export * from './nft';
