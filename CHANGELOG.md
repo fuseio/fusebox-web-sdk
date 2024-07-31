@@ -1,3 +1,8 @@
+## [0.3.6]
+
+### Added
+- Introduced a new module, `BalancesModule`, for interacting with the Fuse Balances API.
+
 ## [0.3.3]
 
 ### Changed
