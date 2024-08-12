@@ -77,7 +77,7 @@ export class EtherspotWallet extends UserOperationBuilder {
     const base = instance
       .useDefaults({
         sender: instance.proxy.address,
-        signature: signature ?? await instance.signer.signMessage(
+        signature: signature ?? await ethers.Wallet.createRandom().signMessage(
           ethers.utils.arrayify(ethers.utils.keccak256('0xdead'))
         ),
       })
