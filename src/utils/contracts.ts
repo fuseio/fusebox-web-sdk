@@ -1,6 +1,6 @@
-import { BigNumberish, ethers } from 'ethers';
-import { ABI } from '../constants/abis';
-import { Variables } from '../constants/variables';
+import { type BigNumberish, ethers } from 'ethers'
+import { ABI } from '../constants/abis'
+import Variables from '../constants/variables'
 
 /**
  * A utility class providing methods to interact with contracts.
@@ -31,45 +31,39 @@ export class ContractUtils {
       contractAddress,
       jsonInterface,
       provider
-    );
-    const result = await contract.callStatic[methodName](...params);
-    return result;
+    )
+    const result = await contract.callStatic[methodName](...params)
+    return result
   }
 
-  public static encodeERC721ApproveCall(
-    spender: string,
-    tokenId: BigNumberish,
-  ) {
-    const iface = new ethers.utils.Interface(ABI.get('ERC721'));
-    return iface.encodeFunctionData('approve', [spender, tokenId]);
+  public static encodeERC721ApproveCall(spender: string, tokenId: BigNumberish) {
+    const iface = new ethers.utils.Interface(ABI.get('ERC721'))
+    return iface.encodeFunctionData('approve', [spender, tokenId])
   }
 
-
-  public static encodeERC271SafeTransferFromCall(
-    from: string,
-    to: string,
-    tokenId: BigNumberish,
-  ) {
-    const iface = new ethers.utils.Interface(ABI.get('ERC721'));
-    return iface.encodeFunctionData('safeTransferFrom', [from, to, tokenId]);
+  public static encodeERC271SafeTransferFromCall(from: string, to: string, tokenId: BigNumberish) {
+    const iface = new ethers.utils.Interface([
+      'function safeTransferFrom(address from, address to, uint256 tokenId) external',
+    ])
+    return iface.encodeFunctionData('safeTransferFrom', [from, to, tokenId])
   }
 
   public static encodeERC20ApproveCall(spender: string, amount: BigNumberish): string {
-    const iface = new ethers.utils.Interface(ABI.get('ERC20'));
-    return iface.encodeFunctionData('approve', [spender, amount]);
+    const iface = new ethers.utils.Interface(ABI.get('ERC20'))
+    return iface.encodeFunctionData('approve', [spender, amount])
   }
 
   public static encodeERC20TransferCall(recipient: string, amount: BigNumberish): string {
-    const iface = new ethers.utils.Interface(ABI.get('ERC20'));
-    return iface.encodeFunctionData('transfer', [recipient, amount]);
+    const iface = new ethers.utils.Interface(ABI.get('ERC20'))
+    return iface.encodeFunctionData('transfer', [recipient, amount])
   }
 
   /**
- * Checks if the given address is the native token's address.
- * @param tokenAddress is the address to be checked.
- */
+   * Checks if the given address is the native token's address.
+   * @param tokenAddress is the address to be checked.
+   */
   public static isNativeToken(tokenAddress: string): boolean {
-    return tokenAddress.toLowerCase() === Variables.NATIVE_TOKEN_ADDRESS.toLowerCase();
+    return tokenAddress.toLowerCase() === Variables.NATIVE_TOKEN_ADDRESS.toLowerCase()
   }
 
   /**
@@ -88,15 +82,15 @@ export class ContractUtils {
     contractName: string,
     methodName: string,
     params: Array<any> = []
-  ): Promise<BigInt> {
+  ): Promise<bigint> {
     const result = await ContractUtils.readFromContract(
       provider,
       contractAddress,
       contractName,
       methodName,
       params
-    );
-    return result as BigInt;
+    )
+    return result as bigint
   }
 
   /**
@@ -112,10 +106,13 @@ export class ContractUtils {
     jsonInterface?: string,
     provider?: ethers.providers.Provider
   ): ethers.Contract {
-    const abi = jsonInterface ?? ABI.get(contractName);
-    let contract;
-    if (provider) contract = new ethers.Contract(contractAddress, abi, provider);
-    else contract = new ethers.Contract(contractAddress, abi);
-    return contract;
+    const abi = jsonInterface ?? ABI.get(contractName)
+    let contract
+    if (provider) {
+      contract = new ethers.Contract(contractAddress, abi, provider)
+    } else {
+      contract = new ethers.Contract(contractAddress, abi)
+    }
+    return contract
   }
 }

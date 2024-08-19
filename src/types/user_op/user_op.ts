@@ -1,4 +1,4 @@
-import { amountFromJson } from "../token";
+import { amountFromJson } from '../token'
 
 /**
  * Represents a user operation.
@@ -37,8 +37,8 @@ export class UserOp {
     public target: string,
     public beneficiary: string,
     public erc20Transfers: Erc20Transfers[] = [],
-    public erc721Transfers: Erc721Transfers[] = [],
-  ) { }
+    public erc721Transfers: Erc721Transfers[] = []
+  ) {}
 
   /**
    * Creates a new instance of the UserOp class from a JSON object.
@@ -61,8 +61,8 @@ export class UserOp {
       json.target,
       json.beneficiary,
       json.erc20Transfers?.map(Erc20Transfers.fromJson) ?? [],
-      json.erc721Transfers?.map(Erc721Transfers.fromJson) ?? [],
-    );
+      json.erc721Transfers?.map(Erc721Transfers.fromJson) ?? []
+    )
   }
 
   /**
@@ -71,7 +71,7 @@ export class UserOp {
    * @returns An array of UserOp instances.
    */
   static opsFromJson(docs: any[]): UserOp[] {
-    return docs.map(doc => UserOp.fromJson(doc));
+    return docs.map((doc) => UserOp.fromJson(doc))
   }
 }
 
@@ -81,7 +81,6 @@ export class UserOp {
 export class Erc20Transfers {
   /**
    * Represents a user operation.
-   * @constructor
    * @param from - The sender address.
    * @param to - The recipient address.
    * @param value - The value of the operation.
@@ -97,8 +96,8 @@ export class Erc20Transfers {
     public contractAddress: string,
     public name: string,
     public symbol: string,
-    public decimals: number,
-  ) { }
+    public decimals: number
+  ) {}
 
   /**
    * Creates an instance of Erc20Transfers from a JSON object.
@@ -113,8 +112,8 @@ export class Erc20Transfers {
       json.contractAddress,
       json.name,
       json.symbol,
-      json.decimals,
-    );
+      json.decimals
+    )
   }
 }
 
@@ -137,8 +136,8 @@ export class Erc721Transfers {
     public contractAddress: string,
     public tokenId: string,
     public name: string,
-    public symbol: string,
-  ) { }
+    public symbol: string
+  ) {}
 
   /**
    * Creates a new instance of the Erc721Transfers class from a JSON object.
@@ -152,7 +151,7 @@ export class Erc721Transfers {
       json.contractAddress,
       json.tokenId,
       json.name,
-      json.symbol,
-    );
+      json.symbol
+    )
   }
 }

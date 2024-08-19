@@ -1,18 +1,25 @@
-import { AxiosInstance, AxiosResponse } from 'axios';
-import { StakeRequestBody, StakeResponseBody, StakedTokenResponse, StakingOption, UnstakeRequestBody, UnstakeResponseBody } from '../types';
+import type { AxiosInstance, AxiosResponse } from 'axios'
+import {
+  type StakeRequestBody,
+  StakeResponseBody,
+  StakedTokenResponse,
+  StakingOption,
+  type UnstakeRequestBody,
+  UnstakeResponseBody,
+} from '../types'
 
 /**
  * Represents a module for staking operations.
  */
 export class StakingModule {
-  private readonly _axios: AxiosInstance;
+  private readonly _axios: AxiosInstance
 
   /**
    * Creates an instance of StakingModule.
    * @param axios - The AxiosInstance used for making HTTP requests.
    */
   constructor(axios: AxiosInstance) {
-    this._axios = axios;
+    this._axios = axios
   }
 
   /**
@@ -21,15 +28,8 @@ export class StakingModule {
    * @throws If an error occurs during the API request.
    */
   async getStakingOptions(): Promise<StakingOption[]> {
-    try {
-      const response: AxiosResponse = await this._axios.get('/v0/staking/staking_options');
-      if (response.status === 200) {
-        return StakingOption.optionsFromJson(response.data);
-      }
-      throw response;
-    } catch (error) {
-      throw error;
-    }
+    const response: AxiosResponse = await this._axios.get('/v0/staking/staking_options')
+    return StakingOption.optionsFromJson(response.data)
   }
 
   /**
@@ -39,15 +39,11 @@ export class StakingModule {
    * @throws If an error occurs during the API request.
    */
   async stake(stakeRequestBody: StakeRequestBody): Promise<StakeResponseBody> {
-    try {
-      const response: AxiosResponse = await this._axios.post('/v0/staking/stake', stakeRequestBody.toJson());
-      if (response.status === 201) {
-        return StakeResponseBody.fromJson(response.data);
-      }
-      throw response;
-    } catch (error) {
-      throw error;
-    }
+    const response: AxiosResponse = await this._axios.post(
+      '/v0/staking/stake',
+      stakeRequestBody.toJson()
+    )
+    return StakeResponseBody.fromJson(response.data)
   }
 
   /**
@@ -57,15 +53,11 @@ export class StakingModule {
    * @throws If an error occurs during the API request.
    */
   async unstake(unstakeRequestBody: UnstakeRequestBody): Promise<UnstakeResponseBody> {
-    try {
-      const response: AxiosResponse = await this._axios.post('/v0/staking/unstake', unstakeRequestBody.toJson());
-      if (response.status === 201) {
-        return UnstakeResponseBody.fromJson(response.data);
-      }
-      throw response;
-    } catch (error) {
-      throw error;
-    }
+    const response: AxiosResponse = await this._axios.post(
+      '/v0/staking/unstake',
+      unstakeRequestBody.toJson()
+    )
+    return UnstakeResponseBody.fromJson(response.data)
   }
 
   /**
@@ -75,14 +67,9 @@ export class StakingModule {
    * @throws If an error occurs during the API request.
    */
   async getStakedTokens(walletAddress: string): Promise<StakedTokenResponse> {
-    try {
-      const response: AxiosResponse = await this._axios.get(`/v0/staking/staked_tokens/${walletAddress}`);
-      if (response.status === 200) {
-        return StakedTokenResponse.fromJson(response.data);
-      }
-      throw response;
-    } catch (error) {
-      throw error;
-    }
+    const response: AxiosResponse = await this._axios.get(
+      `/v0/staking/staked_tokens/${walletAddress}`
+    )
+    return StakedTokenResponse.fromJson(response.data)
   }
 }

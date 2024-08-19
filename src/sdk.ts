@@ -1,50 +1,52 @@
-import { StakeRequestBody } from './types/staking/stake';
-import axios, { AxiosInstance } from 'axios';
-import ethers, { BigNumber, BigNumberish } from 'ethers';
+import axios, { type AxiosInstance } from 'axios'
+import type ethers from 'ethers'
+import { BigNumber, type BigNumberish } from 'ethers'
+import { parseUnits } from 'ethers/lib/utils'
 import {
   Client,
-  EOASigner,
-  ICall,
-  IClientOpts,
-  IPresetBuilderOpts,
-  ISendUserOperationResponse,
-  UserOperationMiddlewareFn,
-} from 'userop';
-import { EtherspotWallet } from './etherspot';
-import { verifyingPaymaster } from 'userop/dist/preset/middleware';
-import { SmartWalletAuth } from './utils/auth';
-import { ContractUtils } from './utils/contracts';
-import { Variables } from './constants/variables';
+  type EOASigner,
+  type ICall,
+  type IClientOpts,
+  type IPresetBuilderOpts,
+  type ISendUserOperationResponse,
+  type UserOperationMiddlewareFn,
+} from 'userop'
+import { verifyingPaymaster } from 'userop/dist/preset/middleware'
+import Variables from './constants/variables'
+import { EtherspotWallet } from './etherspot'
 import {
-  ERC20,
-  Native,
-  parseTokenDetails,
-  TradeRequest,
-  WalletActionResult,
-  UnstakeRequestBody
-} from './types';
-import { NonceManager } from './utils/nonceManager';
-import {
+  BalancesModule,
   ExplorerModule,
+  GraphQLModule,
   StakingModule,
   TradeModule,
-  GraphQLModule,
-  BalancesModule
-} from './modules';
-import { parseUnits } from 'ethers/lib/utils';
+} from './modules'
+import {
+  DefaultTxOptions,
+  type ERC20,
+  Native,
+  type TradeRequest,
+  type UnstakeRequestBody,
+  WalletActionResult,
+  parseTokenDetails,
+} from './types'
+import type { StakeRequestBody } from './types/staking/stake'
+import { SmartWalletAuth } from './utils/auth'
+import { ContractUtils } from './utils/contracts'
+import { NonceManager } from './utils/nonceManager'
 
 export class FuseSDK {
-  private readonly _axios: AxiosInstance;
-  private readonly _feeTooLowError = 'fee too low';
-  private _jwtToken!: string;
-  public wallet!: EtherspotWallet;
-  public client!: Client;
-  public tradeModule!: TradeModule;
-  public explorerModule!: ExplorerModule;
-  public stakingModule!: StakingModule;
-  public balancesModule!: BalancesModule;
-  public graphQLModule!: GraphQLModule;
-  private _nonceManager!: NonceManager;
+  private readonly _axios: AxiosInstance
+  private readonly _feeTooLowError = 'fee too low'
+  private _jwtToken!: string
+  public wallet!: EtherspotWallet
+  public client!: Client
+  public tradeModule!: TradeModule
+  public explorerModule!: ExplorerModule
+  public stakingModule!: StakingModule
+  public balancesModule!: BalancesModule
+  public graphQLModule!: GraphQLModule
+  private _nonceManager!: NonceManager
 
   constructor(
     public readonly publicApiKey: string,
@@ -58,17 +60,17 @@ export class FuseSDK {
       params: {
         apiKey: publicApiKey,
       },
-    });
-    this._initializeModules();
+    })
+    this._initializeModules()
   }
 
   _initializeModules() {
-    this._nonceManager = new NonceManager();
-    this.tradeModule = new TradeModule(this._axios);
-    this.explorerModule = new ExplorerModule(this._axios);
-    this.stakingModule = new StakingModule(this._axios);
-    this.balancesModule = new BalancesModule(this._axios);
-    this.graphQLModule = new GraphQLModule(this._axios);
+    this._nonceManager = new NonceManager()
+    this.tradeModule = new TradeModule(this._axios)
+    this.explorerModule = new ExplorerModule(this._axios)
+    this.stakingModule = new StakingModule(this._axios)
+    this.balancesModule = new BalancesModule(this._axios)
+    this.graphQLModule = new GraphQLModule(this._axios)
   }
 
   /**
@@ -93,21 +95,21 @@ export class FuseSDK {
       signature,
       baseUrl = Variables.BASE_URL,
     }: {
-      withPaymaster?: boolean;
-      paymasterContext?: Record<string, unknown>;
-      opts?: IPresetBuilderOpts;
-      clientOpts?: IClientOpts;
-      jwtToken?: string;
-      signature?: string;
-      baseUrl?: string;
+      withPaymaster?: boolean
+      paymasterContext?: Record<string, unknown>
+      opts?: IPresetBuilderOpts
+      clientOpts?: IClientOpts
+      jwtToken?: string
+      signature?: string
+      baseUrl?: string
     } = {}
   ): Promise<FuseSDK> {
-    const fuseSDK = new FuseSDK(publicApiKey, baseUrl);
+    const fuseSDK = new FuseSDK(publicApiKey, baseUrl)
 
-    let paymasterMiddleware;
+    let paymasterMiddleware
 
     if (withPaymaster) {
-      paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, baseUrl, paymasterContext);
+      paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, baseUrl, paymasterContext)
     }
 
     fuseSDK.wallet = await FuseSDK._initializeWallet(
@@ -117,18 +119,18 @@ export class FuseSDK {
       opts,
       paymasterMiddleware,
       signature
-    );
+    )
 
     if (jwtToken) {
-      fuseSDK._jwtToken = jwtToken;
+      fuseSDK._jwtToken = jwtToken
     } else {
-      await fuseSDK.authenticate(credentials);
+      await fuseSDK.authenticate(credentials)
     }
 
     fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey, baseUrl), {
       ...clientOpts,
-    });
-    return fuseSDK;
+    })
+    return fuseSDK
   }
 
   /**
@@ -139,35 +141,31 @@ export class FuseSDK {
    */
   async executeBatch(
     calls: Array<ICall>,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS,
+    txOptions?: DefaultTxOptions
   ): Promise<ISendUserOperationResponse | null | undefined> {
-    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
+    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS
 
     if (txOptions?.useNonceSequence) {
-      this._nonceManager.increment();
-      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();
+      this._nonceManager.increment()
+      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve()
     }
 
     try {
-      const userOp = this.wallet.executeBatch(calls);
-      return await this.client.sendUserOperation(userOp);
+      const userOp = this.wallet.executeBatch(calls)
+      return await this.client.sendUserOperation(userOp)
     } catch (e: any) {
       if (txOptions.withRetry && e.message.includes(this._feeTooLowError)) {
         // Use eip1559 as soon as it's available on Fuse
-        const gasPrices = await this._fetchGasPrice();
+        const gasPrices = await this._fetchGasPrice()
         const increasedFees = this._increaseFeeByPercentage(
           gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
-        );
-        this.setWalletFees(increasedFees);
-        try {
-          const userOp = this.wallet.executeBatch(calls);
-          return await this.client.sendUserOperation(userOp);
-        } catch (e: any) {
-          throw e;
-        }
+        )
+        this.setWalletFees(increasedFees)
+        const userOp = this.wallet.executeBatch(calls)
+        return await this.client.sendUserOperation(userOp)
       } else {
-        throw e;
+        throw e
       }
     }
   }
@@ -181,26 +179,30 @@ export class FuseSDK {
    * @param txOptions are the transaction options.
    * @returns
    */
-  async callContract(to: string, value: BigNumberish, data: Uint8Array, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
+  async callContract(
+    to: string,
+    value: BigNumberish,
+    data: Uint8Array,
+    txOptions?: DefaultTxOptions
+  ) {
     const call: ICall = {
-      to: to,
-      value: value,
-      data: data,
-    };
-
-    if (txOptions?.useNonceSequence) {
-      this._nonceManager.increment();
-      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve();
+      to,
+      value,
+      data,
     }
 
-    return await this._executeUserOperation(call, txOptions);
+    if (txOptions?.useNonceSequence) {
+      this._nonceManager.increment()
+      this.wallet.nonceKey = txOptions?.customNonceKey ?? this._nonceManager.retrieve()
+    }
+
+    return await this._executeUserOperation(call, txOptions)
   }
 
-
   private async _getNativeBalance(address: string): Promise<ethers.BigNumber> {
-    const web3client = this.wallet.proxy.provider;
-    const balance = await web3client.getBalance(address);
-    return balance;
+    const web3client = this.wallet.proxy.provider
+    const balance = await web3client.getBalance(address)
+    return balance
   }
 
   /**
@@ -216,7 +218,7 @@ export class FuseSDK {
    */
   async getBalance(tokenAddress: string, address: string) {
     if (ContractUtils.isNativeToken(tokenAddress)) {
-      return await this._getNativeBalance(address);
+      return await this._getNativeBalance(address)
     }
     return ContractUtils.readFromContractWithFirstResult(
       this.wallet.proxy.provider,
@@ -224,7 +226,7 @@ export class FuseSDK {
       'ERC20',
       'balanceOf',
       [address]
-    );
+    )
   }
 
   /**
@@ -244,7 +246,7 @@ export class FuseSDK {
       'ERC20',
       'allowance',
       [this.wallet.getSender(), spender]
-    );
+    )
   }
 
   /**
@@ -258,16 +260,16 @@ export class FuseSDK {
    */
   async getERC20TokenDetails(tokenAddress: string) {
     if (ContractUtils.isNativeToken(tokenAddress)) {
-      return new Native({ amount: BigInt(0) });
+      return new Native({ balance: BigInt(0) })
     }
-    const toRead = ['name', 'symbol', 'decimals'];
+    const toRead = ['name', 'symbol', 'decimals']
     const token = await Promise.all(
       toRead.map((key) =>
         ContractUtils.readFromContract(this.wallet.proxy.provider, tokenAddress, 'ERC20', key, [])
       )
-    );
+    )
 
-    const [name, symbol, decimals] = token;
+    const [name, symbol, decimals] = token
 
     return parseTokenDetails({
       address: tokenAddress,
@@ -275,8 +277,8 @@ export class FuseSDK {
       symbol,
       decimals,
       amount: BigInt(0),
-      type: 'ERC-20'
-    }) as ERC20;
+      type: 'ERC-20',
+    }) as ERC20
   }
 
   /**
@@ -285,10 +287,10 @@ export class FuseSDK {
    * @returns JWT token upon successful authentication.
    */
   async authenticate(credentials: EOASigner): Promise<string> {
-    const auth = await SmartWalletAuth.signer(credentials, this.wallet.getSender());
-    const response = await this._axios.post('/v2/smart-wallets/auth', auth.toJson());
-    this._jwtToken = response.data.jwt;
-    return response.data.jwt;
+    const auth = await SmartWalletAuth.signer(credentials, this.wallet.getSender())
+    const response = await this._axios.post('/v2/smart-wallets/auth', auth.toJson())
+    this._jwtToken = response.data.jwt
+    return response.data.jwt
   }
 
   /**
@@ -319,7 +321,7 @@ export class FuseSDK {
         nonceKey: opts?.nonceKey,
       },
       signature
-    );
+    )
   }
 
   /**
@@ -328,7 +330,7 @@ export class FuseSDK {
    * @returns
    */
   private static _getBundlerRpc(publicApiKey: string, baseUrl: string): string {
-    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`;
+    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`
   }
 
   /**
@@ -345,7 +347,7 @@ export class FuseSDK {
     return verifyingPaymaster(
       `https://${baseUrl}/api/v0/paymaster?apiKey=${publicApiKey}`,
       paymasterContext ?? {}
-    );
+    )
   }
 
   /**
@@ -354,7 +356,7 @@ export class FuseSDK {
    * @param percentage is the percentage by which the fees should be increased.
    */
   private _increaseFeeByPercentage(fee: bigint, percentage: number) {
-    return fee + (fee * BigInt(percentage)) / BigInt(100);
+    return fee + (fee * BigInt(percentage)) / BigInt(100)
   }
 
   /**
@@ -362,8 +364,8 @@ export class FuseSDK {
    * @param fees are the fees to be set.
    */
   setWalletFees(fees: ethers.BigNumberish) {
-    this.wallet.setMaxFeePerGas(fees);
-    this.wallet.setMaxPriorityFeePerGas(fees);
+    this.wallet.setMaxFeePerGas(fees)
+    this.wallet.setMaxPriorityFeePerGas(fees)
   }
 
   /**
@@ -374,43 +376,36 @@ export class FuseSDK {
    */
   private async _executeUserOperation(
     call: ICall,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ): Promise<ISendUserOperationResponse | null | undefined> {
-    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS;
+    txOptions = txOptions ?? Variables.DEFAULT_TX_OPTIONS
 
     try {
-      const userOp = this.wallet.execute(call.to, call.value, call.data);
-      return await this.client.sendUserOperation(userOp);
+      const userOp = this.wallet.execute(call.to, call.value, call.data)
+      return await this.client.sendUserOperation(userOp)
     } catch (e: any) {
       if (e.message.includes(this._feeTooLowError) && txOptions.withRetry) {
         // Use eip1559 as soon as it's available on Fuse
-        const gasPrices = await this._fetchGasPrice();
+        const gasPrices = await this._fetchGasPrice()
         const increasedFees = this._increaseFeeByPercentage(
           gasPrices.maxFeePerGas.toBigInt(),
           txOptions.feeIncrementPercentage
-        );
-        this.setWalletFees(increasedFees);
-        try {
-          const userOp = this.wallet.execute(call.to, call.value, call.data);
-          return await this.client.sendUserOperation(userOp);
-        } catch (e: any) {
-          throw e;
-        }
+        )
+        this.setWalletFees(increasedFees)
+        const userOp = this.wallet.execute(call.to, call.value, call.data)
+        return await this.client.sendUserOperation(userOp)
       } else {
-        throw e;
+        throw e
       }
     }
   }
 
   async _fetchGasPrice() {
-    const {
-      maxFeePerGas,
-      maxPriorityFeePerGas
-    } = await this.wallet.proxy.provider.getFeeData();
+    const { maxFeePerGas, maxPriorityFeePerGas } = await this.wallet.proxy.provider.getFeeData()
 
     return {
       maxFeePerGas: maxFeePerGas!,
-      maxPriorityFeePerGas: maxPriorityFeePerGas!
+      maxPriorityFeePerGas: maxPriorityFeePerGas!,
     }
   }
 
@@ -419,22 +414,18 @@ export class FuseSDK {
     spender: string,
     callData: Uint8Array,
     amount?: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ) {
     if (ContractUtils.isNativeToken(tokenAddress)) {
-      return this.callContract(spender, amount ?? 0, callData, txOptions);
+      return this.callContract(spender, amount ?? 0, callData, txOptions)
     }
 
-    const tokenAllowance = await this.getAllowance(tokenAddress, spender);
+    const tokenAllowance = await this.getAllowance(tokenAddress, spender)
 
     if (BigNumber.from(tokenAllowance).gte(BigNumber.from(amount))) {
-
-      return this.callContract(spender, 0, callData, txOptions);
+      return this.callContract(spender, 0, callData, txOptions)
     } else {
-      const approveCallData = ContractUtils.encodeERC20ApproveCall(
-        spender,
-        amount!,
-      )
+      const approveCallData = ContractUtils.encodeERC20ApproveCall(spender, amount!)
 
       const calls = [
         {
@@ -447,37 +438,37 @@ export class FuseSDK {
           value: BigInt(0),
           data: callData,
         },
-      ];
+      ]
 
-      return this.executeBatch(calls, txOptions);
+      return this.executeBatch(calls, txOptions)
     }
   }
 
   /**
-    * Transfers a specified [amount] of tokens from the user's address to the [recipientAddress].
-    *
-    * @param tokenAddress - Address of the token contract.
-    * @param recipientAddress - Address of the recipient.
-    * @param amount - Amount of tokens to transfer.
-    * @param options - Additional transaction options.
+   * Transfers a specified [amount] of tokens from the user's address to the [recipientAddress].
+   *
+   * @param tokenAddress - Address of the token contract.
+   * @param recipientAddress - Address of the recipient.
+   * @param amount - Amount of tokens to transfer.
+   * @param options - Additional transaction options.
    */
   async transferToken(
     tokenAddress: string,
     recipientAddress: string,
     amount: BigNumberish,
     data?: Uint8Array,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ) {
-    data = data ?? new Uint8Array(0);
+    data = data ?? new Uint8Array(0)
     if (ContractUtils.isNativeToken(tokenAddress)) {
-      return this.callContract(recipientAddress, amount, data, txOptions);
+      return this.callContract(recipientAddress, amount, data, txOptions)
     } else {
       const transferCallData = ContractUtils.encodeERC20TransferCall(
         recipientAddress,
         amount
-      ) as unknown as Uint8Array;
+      ) as unknown as Uint8Array
 
-      return this.callContract(tokenAddress, BigInt(0), transferCallData, txOptions);
+      return this.callContract(tokenAddress, BigInt(0), transferCallData, txOptions)
     }
   }
 
@@ -493,20 +484,20 @@ export class FuseSDK {
     nftContractAddress: string,
     recipientAddress: string,
     tokenId: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ) {
     const transferCallData = ContractUtils.encodeERC271SafeTransferFromCall(
       this.wallet.getSender(),
       recipientAddress,
       tokenId
-    ) as unknown as Uint8Array;
+    ) as unknown as Uint8Array
 
-    return this.callContract(nftContractAddress, BigInt(0), transferCallData, txOptions);
+    return this.callContract(nftContractAddress, BigInt(0), transferCallData, txOptions)
   }
 
   /**
    * Retrieves historical actions for a smart wallet, with optional filtering by token address and update time.
-   * 
+   *
    * @param page The page number to retrieve, default is 1.
    * @param limit Number of items in each page, default is 10.
    * @param tokenAddress Filter actions related to the specified token address.
@@ -517,77 +508,72 @@ export class FuseSDK {
     limit = 10,
     tokenAddress,
   }: {
-    page?: number;
-    limit?: number;
-    tokenAddress?: string;
+    page?: number
+    limit?: number
+    tokenAddress?: string
   }): Promise<WalletActionResult> {
     const queryParameters: Record<string, any> = {
       page,
       limit,
-    };
+    }
 
     if (tokenAddress !== undefined) {
-      queryParameters.tokenAddress = tokenAddress;
+      queryParameters.tokenAddress = tokenAddress
     }
 
-    try {
-      const response = await this._axios.get('/v2/smart-wallets/actions', {
-        params: queryParameters,
-        headers: {
-          Authorization: `Bearer ${this._jwtToken}`,
-        },
-      });
+    const response = await this._axios.get('/v2/smart-wallets/actions', {
+      params: queryParameters,
+      headers: {
+        Authorization: `Bearer ${this._jwtToken}`,
+      },
+    })
 
-      return WalletActionResult.fromJson(response.data);
-    } catch (error) {
-      throw error;
-    }
+    return WalletActionResult.fromJson(response.data)
   }
 
   /**
    *   /// Approves the [spender] to withdraw or transfer a certain [amount] of tokens on behalf of the user's address.
-   * 
+   *
    * @param tokenAddress - Address of the token contract.
    * @param spender - Address which will spend the tokens.
    * @param amount - Amount of tokens to approve.
    * @param txOptions Additional transaction options.
    * @returns
-  */
+   */
   async approveToken(
     tokenAddress: string,
     spender: string,
     amount: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ) {
     const approveCallData = ContractUtils.encodeERC20ApproveCall(
       spender,
       amount
-    ) as unknown as Uint8Array;
+    ) as unknown as Uint8Array
 
-    return this.callContract(tokenAddress, BigInt(0), approveCallData, txOptions);
+    return this.callContract(tokenAddress, BigInt(0), approveCallData, txOptions)
   }
 
-
   /**
-    * Approves a [spender] to transfer or withdraw a specific NFT [tokenId] on behalf of the user.
-    *
-    * @param nftContractAddress - Address of the token contract.
-    * @param spender - Address which will spend the tokens.
-    * @param tokenId - NFT token ID of item in the collection to approve.
-    * @param options - Additional transaction options.
+   * Approves a [spender] to transfer or withdraw a specific NFT [tokenId] on behalf of the user.
+   *
+   * @param nftContractAddress - Address of the token contract.
+   * @param spender - Address which will spend the tokens.
+   * @param tokenId - NFT token ID of item in the collection to approve.
+   * @param options - Additional transaction options.
    */
   async approveNFTToken(
     nftContractAddress: string,
     spender: string,
     tokenId: BigNumberish,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ) {
     const approveCallData = ContractUtils.encodeERC721ApproveCall(
       spender,
       tokenId
-    ) as unknown as Uint8Array;
+    ) as unknown as Uint8Array
 
-    return this.callContract(nftContractAddress, BigInt(0), approveCallData, txOptions);
+    return this.callContract(nftContractAddress, BigInt(0), approveCallData, txOptions)
   }
 
   /**
@@ -608,12 +594,12 @@ export class FuseSDK {
     spender: string,
     amount: BigNumberish,
     callData: Uint8Array,
-    txOptions?: typeof Variables.DEFAULT_TX_OPTIONS
+    txOptions?: DefaultTxOptions
   ) {
     const approveCallData = ContractUtils.encodeERC20ApproveCall(
       spender,
       amount
-    ) as unknown as Uint8Array;
+    ) as unknown as Uint8Array
 
     const calls = [
       {
@@ -626,9 +612,9 @@ export class FuseSDK {
         value: BigInt(0),
         data: callData,
       },
-    ];
+    ]
 
-    return this.executeBatch(calls, txOptions);
+    return this.executeBatch(calls, txOptions)
   }
 
   /**
@@ -637,12 +623,12 @@ export class FuseSDK {
    * This method facilitates token swaps by interacting with the trade module.
    * @param tradeRequest contains details about the token swap, such as the input and output tokens.
    * @param options provides additional transaction options.
-   * @returns 
+   * @returns
    */
-  async swapTokens(tradeRequest: TradeRequest, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
-    const tradeData = await this.tradeModule.quote(tradeRequest);
-    const spender = tradeData.to;
-    const callData = tradeData.data as unknown as Uint8Array;
+  async swapTokens(tradeRequest: TradeRequest, txOptions?: DefaultTxOptions) {
+    const tradeData = await this.tradeModule.quote(tradeRequest)
+    const spender = tradeData.to
+    const callData = tradeData.data as unknown as Uint8Array
 
     return this._processOperation(
       tradeData.sellTokenAddress,
@@ -650,24 +636,24 @@ export class FuseSDK {
       callData,
       tradeRequest.inputAmount,
       txOptions
-    );
+    )
   }
 
   /**
-    * Stakes tokens based on the provided [stakeRequestBody].
-    *
-    * This method facilitates token staking by interacting with the staking module.
-    * @param stakeRequestBody - contains details about the token staking, such as the token address and amount.
-    * @param options - provides additional transaction options.
+   * Stakes tokens based on the provided [stakeRequestBody].
+   *
+   * This method facilitates token staking by interacting with the staking module.
+   * @param stakeRequestBody - contains details about the token staking, such as the token address and amount.
+   * @param options - provides additional transaction options.
    */
-  async stakeToken(stakeRequestBody: StakeRequestBody, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
-    const data = await this.stakingModule.stake(stakeRequestBody);
-    const stakeCallData = data.encodedABI as unknown as Uint8Array;
-    const spender = data.contractAddress;
+  async stakeToken(stakeRequestBody: StakeRequestBody, txOptions?: DefaultTxOptions) {
+    const data = await this.stakingModule.stake(stakeRequestBody)
+    const stakeCallData = data.encodedABI as unknown as Uint8Array
+    const spender = data.contractAddress
 
-    const amountIn = stakeRequestBody.tokenAmount;
-    const { decimals } = await this.getERC20TokenDetails(stakeRequestBody.tokenAddress);
-    const amount = parseUnits(amountIn, decimals.toString());
+    const amountIn = stakeRequestBody.tokenAmount
+    const { decimals } = await this.getERC20TokenDetails(stakeRequestBody.tokenAddress)
+    const amount = parseUnits(amountIn, decimals.toString())
 
     return this._processOperation(
       stakeRequestBody.tokenAddress,
@@ -675,7 +661,7 @@ export class FuseSDK {
       stakeCallData,
       amount,
       txOptions
-    );
+    )
   }
 
   /**
@@ -686,20 +672,18 @@ export class FuseSDK {
    * @param unStakeTokenAddress - is the address of the unstake token contract.
    * @param options - provides additional transaction options.
    */
-  async unstakeToken(unstakeRequestBody: UnstakeRequestBody, unStakeTokenAddress: string, txOptions?: typeof Variables.DEFAULT_TX_OPTIONS) {
-    const data = await this.stakingModule.unstake(unstakeRequestBody);
-    const unstakeCallData = data.encodedABI as unknown as Uint8Array;
-    const spender = data.contractAddress;
-    const amountIn = unstakeRequestBody.tokenAmount;
-    const { decimals } = await this.getERC20TokenDetails(unstakeRequestBody.tokenAddress);
-    const amount = parseUnits(amountIn, decimals.toString());
+  async unstakeToken(
+    unstakeRequestBody: UnstakeRequestBody,
+    unStakeTokenAddress: string,
+    txOptions?: DefaultTxOptions
+  ) {
+    const data = await this.stakingModule.unstake(unstakeRequestBody)
+    const unstakeCallData = data.encodedABI as unknown as Uint8Array
+    const spender = data.contractAddress
+    const amountIn = unstakeRequestBody.tokenAmount
+    const { decimals } = await this.getERC20TokenDetails(unstakeRequestBody.tokenAddress)
+    const amount = parseUnits(amountIn, decimals.toString())
 
-    return this._processOperation(
-      unStakeTokenAddress,
-      spender,
-      unstakeCallData,
-      amount,
-      txOptions
-    );
+    return this._processOperation(unStakeTokenAddress, spender, unstakeCallData, amount, txOptions)
   }
 }

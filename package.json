@@ -1,6 +1,6 @@
 {
   "name": "@fuseio/fusebox-web-sdk",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Fuse Wallet SDK now has a JS implementation, making it even easier to integrate blockchain technology into your mobile apps.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -11,32 +11,23 @@
   "scripts": {
     "prepare": "npm run build",
     "gen:types": "typechain --target=ethers-v5 --out-dir=src/typechain 'abi/*.json'",
-    "build": "tsc"
+    "build": "tsc",
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "lint:fix": "npm run lint --write"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@biomejs/biome": "1.8.3",
     "@typechain/ethers-v5": "^11.1.2",
-    "@types/node": "^20.11.17",
-    "@typescript-eslint/eslint-plugin": "^6.7.5",
-    "eslint": "^8.51.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard-with-typescript": "^39.1.1",
-    "eslint-plugin-import": "^2.28.1",
-    "eslint-plugin-n": "^16.2.0",
-    "eslint-plugin-prettier": "^5.0.1",
-    "eslint-plugin-promise": "^6.1.1",
-    "prettier": "^3.0.3",
     "typechain": "^8.3.2",
-    "typedoc": "^0.25.2",
-    "typescript": "^5.2.2"
+    "typescript": "~5.2.2"
   },
   "dependencies": {
-    "@ethersproject/providers": "^5.7.2",
-    "axios": "^1.5.1",
-    "bignumber.js": "^9.1.2",
-    "ethers": "^5.5.2",
+    "axios": "^1.7.4",
+    "ethers": "^5.7.2",
     "userop": "^0.3.8"
   }
 }

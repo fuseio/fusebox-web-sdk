@@ -1,6 +1,6 @@
 export class ABI {
   public static get(name: string): string {
-    let abi;
+    let abi
     switch (name) {
       case 'ERC721':
         abi = [
@@ -109,16 +109,36 @@ export class ABI {
             outputs: [],
             name: 'approve',
             inputs: [
-              { type: 'address', name: 'to', internalType: 'address' },
-              { type: 'uint256', name: 'tokenId', internalType: 'uint256' },
+              {
+                type: 'address',
+                name: 'to',
+                internalType: 'address',
+              },
+              {
+                type: 'uint256',
+                name: 'tokenId',
+                internalType: 'uint256',
+              },
             ],
           },
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'uint256', name: '', internalType: 'uint256' }],
+            outputs: [
+              {
+                type: 'uint256',
+                name: '',
+                internalType: 'uint256',
+              },
+            ],
             name: 'balanceOf',
-            inputs: [{ type: 'address', name: 'owner', internalType: 'address' }],
+            inputs: [
+              {
+                type: 'address',
+                name: 'owner',
+                internalType: 'address',
+              },
+            ],
           },
           {
             type: 'function',
@@ -130,9 +150,21 @@ export class ABI {
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'address', name: '', internalType: 'address' }],
+            outputs: [
+              {
+                type: 'address',
+                name: '',
+                internalType: 'address',
+              },
+            ],
             name: 'getApproved',
-            inputs: [{ type: 'uint256', name: 'tokenId', internalType: 'uint256' }],
+            inputs: [
+              {
+                type: 'uint256',
+                name: 'tokenId',
+                internalType: 'uint256',
+              },
+            ],
           },
           {
             type: 'function',
@@ -140,18 +172,40 @@ export class ABI {
             outputs: [{ type: 'bool', name: '', internalType: 'bool' }],
             name: 'isApprovedForAll',
             inputs: [
-              { type: 'address', name: 'owner', internalType: 'address' },
-              { type: 'address', name: 'operator', internalType: 'address' },
+              {
+                type: 'address',
+                name: 'owner',
+                internalType: 'address',
+              },
+              {
+                type: 'address',
+                name: 'operator',
+                internalType: 'address',
+              },
             ],
           },
           {
             type: 'function',
             stateMutability: 'nonpayable',
-            outputs: [{ type: 'uint256', name: '', internalType: 'uint256' }],
+            outputs: [
+              {
+                type: 'uint256',
+                name: '',
+                internalType: 'uint256',
+              },
+            ],
             name: 'mintItem',
             inputs: [
-              { type: 'address', name: 'to', internalType: 'address' },
-              { type: 'string', name: 'tokenURI', internalType: 'string' },
+              {
+                type: 'address',
+                name: 'to',
+                internalType: 'address',
+              },
+              {
+                type: 'string',
+                name: 'tokenURI',
+                internalType: 'string',
+              },
             ],
           },
           {
@@ -164,16 +218,34 @@ export class ABI {
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'address', name: '', internalType: 'address' }],
+            outputs: [
+              {
+                type: 'address',
+                name: '',
+                internalType: 'address',
+              },
+            ],
             name: 'owner',
             inputs: [],
           },
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'address', name: '', internalType: 'address' }],
+            outputs: [
+              {
+                type: 'address',
+                name: '',
+                internalType: 'address',
+              },
+            ],
             name: 'ownerOf',
-            inputs: [{ type: 'uint256', name: 'tokenId', internalType: 'uint256' }],
+            inputs: [
+              {
+                type: 'uint256',
+                name: 'tokenId',
+                internalType: 'uint256',
+              },
+            ],
           },
           {
             type: 'function',
@@ -188,21 +260,21 @@ export class ABI {
             outputs: [],
             name: 'safeTransferFrom',
             inputs: [
-              { type: 'address', name: 'from', internalType: 'address' },
-              { type: 'address', name: 'to', internalType: 'address' },
-              { type: 'uint256', name: 'tokenId', internalType: 'uint256' },
-            ],
-          },
-          {
-            type: 'function',
-            stateMutability: 'nonpayable',
-            outputs: [],
-            name: 'safeTransferFrom',
-            inputs: [
-              { type: 'address', name: 'from', internalType: 'address' },
-              { type: 'address', name: 'to', internalType: 'address' },
-              { type: 'uint256', name: 'tokenId', internalType: 'uint256' },
-              { type: 'bytes', name: '_data', internalType: 'bytes' },
+              {
+                type: 'address',
+                name: 'from',
+                internalType: 'address',
+              },
+              {
+                type: 'address',
+                name: 'to',
+                internalType: 'address',
+              },
+              {
+                type: 'uint256',
+                name: 'tokenId',
+                internalType: 'uint256',
+              },
             ],
           },
           {
@@ -216,7 +288,11 @@ export class ABI {
                 name: 'operator',
                 internalType: 'address',
               },
-              { type: 'bool', name: 'approved', internalType: 'bool' },
+              {
+                type: 'bool',
+                name: 'approved',
+                internalType: 'bool',
+              },
             ],
           },
           {
@@ -242,18 +318,44 @@ export class ABI {
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'uint256', name: '', internalType: 'uint256' }],
+            outputs: [
+              {
+                type: 'uint256',
+                name: '',
+                internalType: 'uint256',
+              },
+            ],
             name: 'tokenByIndex',
-            inputs: [{ type: 'uint256', name: 'index', internalType: 'uint256' }],
+            inputs: [
+              {
+                type: 'uint256',
+                name: 'index',
+                internalType: 'uint256',
+              },
+            ],
           },
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'uint256', name: '', internalType: 'uint256' }],
+            outputs: [
+              {
+                type: 'uint256',
+                name: '',
+                internalType: 'uint256',
+              },
+            ],
             name: 'tokenOfOwnerByIndex',
             inputs: [
-              { type: 'address', name: 'owner', internalType: 'address' },
-              { type: 'uint256', name: 'index', internalType: 'uint256' },
+              {
+                type: 'address',
+                name: 'owner',
+                internalType: 'address',
+              },
+              {
+                type: 'uint256',
+                name: 'index',
+                internalType: 'uint256',
+              },
             ],
           },
           {
@@ -261,12 +363,24 @@ export class ABI {
             stateMutability: 'view',
             outputs: [{ type: 'string', name: '', internalType: 'string' }],
             name: 'tokenURI',
-            inputs: [{ type: 'uint256', name: 'tokenId', internalType: 'uint256' }],
+            inputs: [
+              {
+                type: 'uint256',
+                name: 'tokenId',
+                internalType: 'uint256',
+              },
+            ],
           },
           {
             type: 'function',
             stateMutability: 'view',
-            outputs: [{ type: 'uint256', name: '', internalType: 'uint256' }],
+            outputs: [
+              {
+                type: 'uint256',
+                name: '',
+                internalType: 'uint256',
+              },
+            ],
             name: 'totalSupply',
             inputs: [],
           },
@@ -276,9 +390,21 @@ export class ABI {
             outputs: [],
             name: 'transferFrom',
             inputs: [
-              { type: 'address', name: 'from', internalType: 'address' },
-              { type: 'address', name: 'to', internalType: 'address' },
-              { type: 'uint256', name: 'tokenId', internalType: 'uint256' },
+              {
+                type: 'address',
+                name: 'from',
+                internalType: 'address',
+              },
+              {
+                type: 'address',
+                name: 'to',
+                internalType: 'address',
+              },
+              {
+                type: 'uint256',
+                name: 'tokenId',
+                internalType: 'uint256',
+              },
             ],
           },
           {
@@ -286,10 +412,16 @@ export class ABI {
             stateMutability: 'nonpayable',
             outputs: [],
             name: 'transferOwnership',
-            inputs: [{ type: 'address', name: 'newOwner', internalType: 'address' }],
+            inputs: [
+              {
+                type: 'address',
+                name: 'newOwner',
+                internalType: 'address',
+              },
+            ],
           },
-        ];
-        break;
+        ]
+        break
       case 'NftTransfer':
         abi = [
           {
@@ -378,7 +510,11 @@ export class ABI {
             anonymous: false,
             inputs: [
               { indexed: true, name: 'wallet', type: 'address' },
-              { indexed: true, name: 'nftContract', type: 'address' },
+              {
+                indexed: true,
+                name: 'nftContract',
+                type: 'address',
+              },
               { indexed: true, name: 'tokenId', type: 'uint256' },
               { indexed: false, name: 'to', type: 'address' },
               { indexed: false, name: 'data', type: 'bytes' },
@@ -391,7 +527,11 @@ export class ABI {
             inputs: [
               { indexed: true, name: 'wallet', type: 'address' },
               { indexed: true, name: 'success', type: 'bool' },
-              { indexed: false, name: 'signedHash', type: 'bytes32' },
+              {
+                indexed: false,
+                name: 'signedHash',
+                type: 'bytes32',
+              },
             ],
             name: 'TransactionExecuted',
             type: 'event',
@@ -447,8 +587,8 @@ export class ABI {
             stateMutability: 'nonpayable',
             type: 'function',
           },
-        ];
-        break;
+        ]
+        break
       case 'ERC20':
         abi = [
           {
@@ -647,7 +787,11 @@ export class ABI {
           {
             anonymous: false,
             inputs: [
-              { indexed: true, name: 'previousOwner', type: 'address' },
+              {
+                indexed: true,
+                name: 'previousOwner',
+                type: 'address',
+              },
               { indexed: true, name: 'newOwner', type: 'address' },
             ],
             name: 'OwnershipTransferred',
@@ -693,8 +837,8 @@ export class ABI {
             stateMutability: 'nonpayable',
             type: 'function',
           },
-        ];
-        break;
+        ]
+        break
       case 'TransferManager':
         abi = [
           {
@@ -877,7 +1021,11 @@ export class ABI {
             inputs: [
               { indexed: true, name: 'wallet', type: 'address' },
               { indexed: true, name: 'target', type: 'address' },
-              { indexed: false, name: 'whitelistAfter', type: 'uint64' },
+              {
+                indexed: false,
+                name: 'whitelistAfter',
+                type: 'uint64',
+              },
             ],
             name: 'AddedToWhitelist',
             type: 'event',
@@ -896,7 +1044,11 @@ export class ABI {
             inputs: [
               { indexed: true, name: 'wallet', type: 'address' },
               { indexed: true, name: 'id', type: 'bytes32' },
-              { indexed: true, name: 'executeAfter', type: 'uint256' },
+              {
+                indexed: true,
+                name: 'executeAfter',
+                type: 'uint256',
+              },
               { indexed: false, name: 'token', type: 'address' },
               { indexed: false, name: 'to', type: 'address' },
               { indexed: false, name: 'amount', type: 'uint256' },
@@ -927,8 +1079,16 @@ export class ABI {
             anonymous: false,
             inputs: [
               { indexed: true, name: 'wallet', type: 'address' },
-              { indexed: true, name: 'newLimit', type: 'uint256' },
-              { indexed: true, name: 'startAfter', type: 'uint64' },
+              {
+                indexed: true,
+                name: 'newLimit',
+                type: 'uint256',
+              },
+              {
+                indexed: true,
+                name: 'startAfter',
+                type: 'uint64',
+              },
             ],
             name: 'LimitChanged',
             type: 'event',
@@ -972,7 +1132,11 @@ export class ABI {
             inputs: [
               { indexed: true, name: 'wallet', type: 'address' },
               { indexed: true, name: 'success', type: 'bool' },
-              { indexed: false, name: 'signedHash', type: 'bytes32' },
+              {
+                indexed: false,
+                name: 'signedHash',
+                type: 'bytes32',
+              },
             ],
             name: 'TransactionExecuted',
             type: 'event',
@@ -1193,12 +1357,12 @@ export class ABI {
             stateMutability: 'view',
             type: 'function',
           },
-        ];
-        break;
+        ]
+        break
       default:
-        throw `ABI does not exists for ${name}`;
+        throw new Error(`ABI does not exist for ${name}`)
     }
 
-    return JSON.stringify(abi);
+    return JSON.stringify(abi)
   }
 }

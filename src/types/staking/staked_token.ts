@@ -3,38 +3,38 @@
  */
 export interface IStakedToken {
   /** The blockchain address of the staked token. */
-  tokenAddress: string;
+  tokenAddress: string
   /** The symbol of the staked token. */
-  tokenSymbol: string;
+  tokenSymbol: string
   /** The name of the staked token. */
-  tokenName: string;
+  tokenName: string
   /** The URI for the logo of the staked token. */
-  tokenLogoURI: string;
+  tokenLogoURI: string
   /** The amount of tokens staked. */
-  stakedAmount: number;
+  stakedAmount: number
   /** The staked amount in USD. */
-  stakedAmountUSD: number;
+  stakedAmountUSD: number
   /** The earned amount in USD from staking. */
-  earnedAmountUSD: number;
+  earnedAmountUSD: number
   /** The address of the token received upon unstaking. */
-  unStakeTokenAddress: string;
+  unStakeTokenAddress: string
   /** The annual percentage rate (APR) for staking. */
-  stakingApr: number;
+  stakingApr: number
 }
 
 /**
  * Class representing a staked token with methods for instantiation from JSON.
  */
 export class StakedToken implements IStakedToken {
-  tokenAddress: string;
-  tokenSymbol: string;
-  tokenName: string;
-  tokenLogoURI: string;
-  stakedAmount: number;
-  unStakeTokenAddress: string;
-  stakedAmountUSD: number;
-  earnedAmountUSD: number;
-  stakingApr: number;
+  tokenAddress: string
+  tokenSymbol: string
+  tokenName: string
+  tokenLogoURI: string
+  stakedAmount: number
+  unStakeTokenAddress: string
+  stakedAmountUSD: number
+  earnedAmountUSD: number
+  stakingApr: number
 
   /**
    * Constructs a new StakedToken instance.
@@ -51,15 +51,15 @@ export class StakedToken implements IStakedToken {
     earnedAmountUSD,
     stakingApr,
   }: IStakedToken) {
-    this.tokenAddress = tokenAddress;
-    this.tokenSymbol = tokenSymbol;
-    this.tokenName = tokenName;
-    this.tokenLogoURI = tokenLogoURI;
-    this.stakedAmount = stakedAmount;
-    this.unStakeTokenAddress = unStakeTokenAddress;
-    this.stakedAmountUSD = stakedAmountUSD;
-    this.earnedAmountUSD = earnedAmountUSD;
-    this.stakingApr = stakingApr;
+    this.tokenAddress = tokenAddress
+    this.tokenSymbol = tokenSymbol
+    this.tokenName = tokenName
+    this.tokenLogoURI = tokenLogoURI
+    this.stakedAmount = stakedAmount
+    this.unStakeTokenAddress = unStakeTokenAddress
+    this.stakedAmountUSD = stakedAmountUSD
+    this.earnedAmountUSD = earnedAmountUSD
+    this.stakingApr = stakingApr
   }
 
   /**
@@ -68,7 +68,7 @@ export class StakedToken implements IStakedToken {
    * @returns A new StakedToken instance.
    */
   static fromJson(json: any): StakedToken {
-    return new StakedToken(json);
+    return new StakedToken(json)
   }
 }
 
@@ -77,29 +77,29 @@ export class StakedToken implements IStakedToken {
  */
 export interface IStakedTokenResponse {
   /** The total staked amount in USD. */
-  totalStakedAmountUSD: number;
+  totalStakedAmountUSD: number
   /** The total earned amount in USD. */
-  totalEarnedAmountUSD: number;
+  totalEarnedAmountUSD: number
   /** Array of StakedToken instances. */
-  stakedTokens: StakedToken[];
+  stakedTokens: StakedToken[]
 }
 
 /**
  * Class representing a response containing multiple staked tokens.
  */
 export class StakedTokenResponse implements IStakedTokenResponse {
-  totalStakedAmountUSD: number;
-  totalEarnedAmountUSD: number;
-  stakedTokens: StakedToken[];
+  totalStakedAmountUSD: number
+  totalEarnedAmountUSD: number
+  stakedTokens: StakedToken[]
 
   /**
    * Constructs a new StakedTokenResponse instance.
    * @param params - Object containing initialization values for the response.
    */
   constructor({ totalStakedAmountUSD, totalEarnedAmountUSD, stakedTokens }: IStakedTokenResponse) {
-    this.totalStakedAmountUSD = totalStakedAmountUSD;
-    this.totalEarnedAmountUSD = totalEarnedAmountUSD;
-    this.stakedTokens = stakedTokens.map(StakedToken.fromJson);
+    this.totalStakedAmountUSD = totalStakedAmountUSD
+    this.totalEarnedAmountUSD = totalEarnedAmountUSD
+    this.stakedTokens = stakedTokens.map(StakedToken.fromJson)
   }
 
   /**
@@ -112,6 +112,6 @@ export class StakedTokenResponse implements IStakedTokenResponse {
       totalStakedAmountUSD: json.totalStakedAmountUSD,
       totalEarnedAmountUSD: json.totalEarnedAmountUSD,
       stakedTokens: json.stakedTokens.map((tokenJson: any) => StakedToken.fromJson(tokenJson)),
-    });
+    })
   }
 }

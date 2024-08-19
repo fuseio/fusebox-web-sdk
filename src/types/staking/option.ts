@@ -3,35 +3,35 @@
  */
 export interface IStakingOption {
   /** The address of the staking token. */
-  tokenAddress: string;
+  tokenAddress: string
   /** The symbol of the staking token, e.g., Fuse. */
-  tokenSymbol: string;
+  tokenSymbol: string
   /** The name of the staking token, e.g., Fuse Token. */
-  tokenName: string;
+  tokenName: string
   /** The URI for the logo of the staking token. */
-  tokenLogoURI: string;
+  tokenLogoURI: string
   /** Indicates whether the staking option has expired. */
-  expired: boolean;
+  expired: boolean
   /** The address of the token received upon unstaking. */
-  unStakeTokenAddress: string;
+  unStakeTokenAddress: string
   /** The annual percentage rate (APR) for staking. */
-  stakingApr: number;
+  stakingApr: number
   /** The total value locked in the staking contract. */
-  tvl: number;
+  tvl: number
 }
 
 /**
  * A class implementing `IStakingOption` to manage staking operations.
  */
 export class StakingOption implements IStakingOption {
-  tokenAddress: string;
-  tokenSymbol: string;
-  tokenName: string;
-  tokenLogoURI: string;
-  expired: boolean;
-  unStakeTokenAddress: string;
-  stakingApr: number;
-  tvl: number;
+  tokenAddress: string
+  tokenSymbol: string
+  tokenName: string
+  tokenLogoURI: string
+  expired: boolean
+  unStakeTokenAddress: string
+  stakingApr: number
+  tvl: number
 
   /**
    * Constructs a new `StakingOption` instance.
@@ -54,14 +54,14 @@ export class StakingOption implements IStakingOption {
     stakingApr,
     tvl,
   }: IStakingOption) {
-    this.tokenAddress = tokenAddress;
-    this.tokenSymbol = tokenSymbol;
-    this.tokenName = tokenName;
-    this.tokenLogoURI = tokenLogoURI;
-    this.expired = expired;
-    this.unStakeTokenAddress = unStakeTokenAddress;
-    this.stakingApr = stakingApr;
-    this.tvl = tvl;
+    this.tokenAddress = tokenAddress
+    this.tokenSymbol = tokenSymbol
+    this.tokenName = tokenName
+    this.tokenLogoURI = tokenLogoURI
+    this.expired = expired
+    this.unStakeTokenAddress = unStakeTokenAddress
+    this.stakingApr = stakingApr
+    this.tvl = tvl
   }
 
   /**
@@ -79,7 +79,7 @@ export class StakingOption implements IStakingOption {
       unStakeTokenAddress: json.unStakeTokenAddress,
       stakingApr: json.stakingApr,
       tvl: json.tvl,
-    });
+    })
   }
 
   /**
@@ -88,6 +88,6 @@ export class StakingOption implements IStakingOption {
    * @returns An array of `StakingOption` instances.
    */
   static optionsFromJson(docs: any[]): StakingOption[] {
-    return docs.map(doc => StakingOption.fromJson(doc));
+    return docs.map((doc) => StakingOption.fromJson(doc))
   }
 }

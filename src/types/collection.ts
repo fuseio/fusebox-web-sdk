@@ -2,27 +2,27 @@
  * Interface representing a collection with a name, symbol, and address.
  */
 export interface ICollection {
-  name: string;
-  symbol: string;
-  address: string;
+  name: string
+  symbol: string
+  address: string
 }
 
 /**
  * Represents a collection with a name, symbol, and address.
  */
 export class Collection implements ICollection {
-  name: string;
-  symbol: string;
-  address: string;
+  name: string
+  symbol: string
+  address: string
 
   /**
    * Constructs a new Collection instance.
    * @param {ICollection} param0 - Object containing the collection's name, symbol, and address.
    */
   constructor({ name, symbol, address }: ICollection) {
-    this.name = name;
-    this.symbol = symbol;
-    this.address = address;
+    this.name = name
+    this.symbol = symbol
+    this.address = address
   }
 
   /**
@@ -32,10 +32,10 @@ export class Collection implements ICollection {
    */
   static fromJson(json: any): Collection {
     return new Collection({
-      name: json['collectionName'],
-      symbol: json['collectionSymbol'],
-      address: json['collectionAddress'],
-    });
+      name: json.collectionName,
+      symbol: json.collectionSymbol,
+      address: json.collectionAddress,
+    })
   }
 
   /**
@@ -47,6 +47,6 @@ export class Collection implements ICollection {
       collectionName: this.name,
       collectionSymbol: this.symbol,
       collectionAddress: this.address,
-    };
+    }
   }
 }
