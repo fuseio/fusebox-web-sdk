@@ -1,5 +1,5 @@
-import { BigNumberish } from "ethers";
-import { ContractUtils } from "../../utils/contracts";
+import type { BigNumberish } from 'ethers'
+import { ContractUtils } from '../../utils/contracts'
 
 /**
  * Represents the body of a trade request.
@@ -9,10 +9,10 @@ import { ContractUtils } from "../../utils/contracts";
  * exact output trading scenarios.
  */
 export class TradeRequest {
-  inputToken: string;
-  outputToken: string;
-  inputAmount: BigNumberish;
-  exactIn: boolean;
+  inputToken: string
+  outputToken: string
+  inputAmount: BigNumberish
+  exactIn: boolean
 
   /**
    * Constructs a TradeRequest with the required parameters.
@@ -22,11 +22,16 @@ export class TradeRequest {
    * @param inputAmount - Specifies the amount of the input token to be traded.
    * @param exactIn - Determines the type of trade (exact input or exact output).
    */
-  constructor(inputToken: string, outputToken: string, inputAmount: BigNumberish, exactIn: boolean) {
-    this.inputToken = inputToken;
-    this.outputToken = outputToken;
-    this.inputAmount = inputAmount;
-    this.exactIn = exactIn;
+  constructor(
+    inputToken: string,
+    outputToken: string,
+    inputAmount: BigNumberish,
+    exactIn: boolean
+  ) {
+    this.inputToken = inputToken
+    this.outputToken = outputToken
+    this.inputAmount = inputAmount
+    this.exactIn = exactIn
   }
 
   /**
@@ -41,15 +46,15 @@ export class TradeRequest {
   getParams(): Record<string, any> {
     return this.exactIn
       ? {
-        'sellToken': this.getToken(this.inputToken),
-        'buyToken': this.getToken(this.outputToken),
-        'sellAmount': this.inputAmount.toString(),
-      }
+          sellToken: this.getToken(this.inputToken),
+          buyToken: this.getToken(this.outputToken),
+          sellAmount: this.inputAmount.toString(),
+        }
       : {
-        'buyToken': this.getToken(this.outputToken),
-        'sellToken': this.getToken(this.inputToken),
-        'buyAmount': this.inputAmount.toString(),
-      };
+          buyToken: this.getToken(this.outputToken),
+          sellToken: this.getToken(this.inputToken),
+          buyAmount: this.inputAmount.toString(),
+        }
   }
 
   /**
@@ -63,7 +68,7 @@ export class TradeRequest {
    * @returns The human-readable form of the token address or the address itself.
    */
   private getToken(tokenAddress: string): string {
-    return ContractUtils.isNativeToken(tokenAddress) ? 'FUSE' : tokenAddress;
+    return ContractUtils.isNativeToken(tokenAddress) ? 'FUSE' : tokenAddress
   }
 
   /**
@@ -73,6 +78,11 @@ export class TradeRequest {
    * @returns A TradeRequest instance.
    */
   static fromJson(json: { [key: string]: any }): TradeRequest {
-    return new TradeRequest(json.inputToken, json.outputToken, BigInt(json.inputAmount), json.exactIn);
+    return new TradeRequest(
+      json.inputToken,
+      json.outputToken,
+      BigInt(json.inputAmount),
+      json.exactIn
+    )
   }
 }

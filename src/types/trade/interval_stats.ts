@@ -3,36 +3,36 @@
  */
 export interface IIntervalStats {
   /** The timestamp for the interval, represented as a number. */
-  timestamp: number;
+  timestamp: number
 
   /** The change in price during the interval. */
-  priceChange: number;
+  priceChange: number
 
   /** The price at the start of the interval. */
-  previousPrice: number;
+  previousPrice: number
 
   /** The price at the end of the interval. */
-  currentPrice: number;
+  currentPrice: number
 }
 
 /**
  * Class representing the statistics for a specific interval, implementing the IIntervalStats interface.
  */
 export class IntervalStats implements IIntervalStats {
-  timestamp: number;
-  priceChange: number;
-  previousPrice: number;
-  currentPrice: number;
+  timestamp: number
+  priceChange: number
+  previousPrice: number
+  currentPrice: number
 
   /**
    * Constructs a new instance of IntervalStats.
    * @param {IIntervalStats} The interval stats including timestamp, price change, previous price, and current price.
    */
   constructor({ timestamp, priceChange, previousPrice, currentPrice }: IIntervalStats) {
-    this.timestamp = timestamp;
-    this.priceChange = priceChange;
-    this.previousPrice = previousPrice;
-    this.currentPrice = currentPrice;
+    this.timestamp = timestamp
+    this.priceChange = priceChange
+    this.previousPrice = previousPrice
+    this.currentPrice = currentPrice
   }
 
   /**
@@ -46,7 +46,7 @@ export class IntervalStats implements IIntervalStats {
       priceChange: json.priceChange ?? 0,
       previousPrice: json.previousPrice ?? 0,
       currentPrice: json.currentPrice ?? 0,
-    });
+    })
   }
 
   /**
@@ -59,6 +59,6 @@ export class IntervalStats implements IIntervalStats {
       priceChange: this.priceChange,
       previousPrice: this.previousPrice,
       currentPrice: this.currentPrice,
-    };
+    }
   }
 }

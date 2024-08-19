@@ -1,34 +1,34 @@
-import { Address } from "./address";
-import { Collection } from "./collection";
+import type { Address } from './address'
+import type { Collection } from './collection'
 
 /**
  * Interface representing a collectible item with various properties including metadata.
  */
 export interface ICollectible {
-  description?: string;
-  name?: string;
-  imageURL?: string;
-  descriptorUri: string;
-  createdAt: string;
-  tokenId: string;
-  collection: Collection;
-  owner: Address;
-  creator: Address;
+  description?: string
+  name?: string
+  imageURL?: string
+  descriptorUri: string
+  createdAt: string
+  tokenId: string
+  collection: Collection
+  owner: Address
+  creator: Address
 }
 
 /**
  * Represents a unique item or asset in a collection.
  */
 export class Collectible implements ICollectible {
-  description?: string;
-  name?: string;
-  imageURL?: string;
-  descriptorUri: string;
-  createdAt: string;
-  tokenId: string;
-  collection: Collection;
-  owner: Address;
-  creator: Address;
+  description?: string
+  name?: string
+  imageURL?: string
+  descriptorUri: string
+  createdAt: string
+  tokenId: string
+  collection: Collection
+  owner: Address
+  creator: Address
 
   /**
    * Constructs a new Collectible instance.
@@ -45,15 +45,15 @@ export class Collectible implements ICollectible {
     owner,
     creator,
   }: ICollectible) {
-    this.description = description;
-    this.name = name;
-    this.imageURL = imageURL;
-    this.descriptorUri = descriptorUri;
-    this.createdAt = createdAt;
-    this.tokenId = tokenId;
-    this.collection = collection;
-    this.owner = owner;
-    this.creator = creator;
+    this.description = description
+    this.name = name
+    this.imageURL = imageURL
+    this.descriptorUri = descriptorUri
+    this.createdAt = createdAt
+    this.tokenId = tokenId
+    this.collection = collection
+    this.owner = owner
+    this.creator = creator
   }
 
   /**
@@ -62,13 +62,13 @@ export class Collectible implements ICollectible {
    */
   decodeDescriptorUri(): object | null {
     if (this.descriptorUri.startsWith('data:application/json')) {
-      const base64Content = this.descriptorUri.split(',').pop();
+      const base64Content = this.descriptorUri.split(',').pop()
       if (base64Content) {
-        const decodedBytes = Buffer.from(base64Content, 'base64');
-        return JSON.parse(decodedBytes.toString('utf8'));
+        const decodedBytes = Buffer.from(base64Content, 'base64')
+        return JSON.parse(decodedBytes.toString('utf8'))
       }
     }
-    return null;
+    return null
   }
 
   /**
@@ -77,14 +77,14 @@ export class Collectible implements ICollectible {
    */
   get image(): string | null {
     if (this.imageURL) {
-      return this.imageURL;
+      return this.imageURL
     } else {
-      const decodedMetadata = this.decodeDescriptorUri();
+      const decodedMetadata = this.decodeDescriptorUri()
       if (decodedMetadata && 'image' in decodedMetadata) {
-        return decodedMetadata['image'] as string;
+        return decodedMetadata.image as string
       }
     }
-    return null;
+    return null
   }
 
   /**
@@ -95,7 +95,7 @@ export class Collectible implements ICollectible {
   static fromJson(json: any): Collectible {
     return new Collectible({
       ...json,
-      createdAt: json['created'], // Mapping 'created' to 'createdAt'
-    });
+      createdAt: json.created, // Mapping 'created' to 'createdAt'
+    })
   }
 }
