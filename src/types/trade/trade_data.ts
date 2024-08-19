@@ -1,15 +1,14 @@
-
 export interface TradeDataParams {
-  chainId: number;
-  estimatedPriceImpact: string;
-  to: string;
-  data: string;
-  value: string;
-  buyTokenAddress: string;
-  sellTokenAddress: string;
-  buyAmount: string;
-  sellAmount: string;
-  allowanceTarget: string;
+  chainId: number
+  estimatedPriceImpact: string
+  to: string
+  data: string
+  value: string
+  buyTokenAddress: string
+  sellTokenAddress: string
+  buyAmount: string
+  sellAmount: string
+  allowanceTarget: string
 }
 
 /**
@@ -20,16 +19,16 @@ export interface TradeDataParams {
  * and the amounts to be bought or sold.
  */
 export class TradeData {
-  chainId: number;
-  estimatedPriceImpact: string;
-  to: string;
-  data: string;
-  value: string;
-  buyTokenAddress: string;
-  sellTokenAddress: string;
-  buyAmount: string;
-  sellAmount: string;
-  allowanceTarget: string;
+  chainId: number
+  estimatedPriceImpact: string
+  to: string
+  data: string
+  value: string
+  buyTokenAddress: string
+  sellTokenAddress: string
+  buyAmount: string
+  sellAmount: string
+  allowanceTarget: string
 
   /**
    * Constructs a TradeData instance with detailed information about a trade.
@@ -53,16 +52,16 @@ export class TradeData {
     sellAmount,
     allowanceTarget,
   }: TradeDataParams) {
-    this.chainId = chainId;
-    this.estimatedPriceImpact = estimatedPriceImpact;
-    this.to = to;
-    this.data = data;
-    this.value = value;
-    this.buyTokenAddress = buyTokenAddress;
-    this.sellTokenAddress = sellTokenAddress;
-    this.buyAmount = buyAmount;
-    this.sellAmount = sellAmount;
-    this.allowanceTarget = allowanceTarget;
+    this.chainId = chainId
+    this.estimatedPriceImpact = estimatedPriceImpact
+    this.to = to
+    this.data = data
+    this.value = value
+    this.buyTokenAddress = buyTokenAddress
+    this.sellTokenAddress = sellTokenAddress
+    this.buyAmount = buyAmount
+    this.sellAmount = sellAmount
+    this.allowanceTarget = allowanceTarget
   }
 
   /**
@@ -83,8 +82,7 @@ export class TradeData {
       buyAmount: json.buyAmount,
       sellAmount: json.sellAmount,
       allowanceTarget: json.allowanceTarget,
-    };
-    return new TradeData(params);
+    }
+    return new TradeData(params)
   }
 }
-

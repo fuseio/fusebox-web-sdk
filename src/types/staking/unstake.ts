@@ -3,11 +3,11 @@
  */
 export interface IUnstakeRequestBody {
   /** The account address. */
-  accountAddress: string;
+  accountAddress: string
   /** The amount of tokens to be unstaked. */
-  tokenAmount: string;
+  tokenAmount: string
   /** The address of the token contract. */
-  tokenAddress: string;
+  tokenAddress: string
 }
 
 /**
@@ -16,20 +16,20 @@ export interface IUnstakeRequestBody {
  */
 export class UnstakeRequestBody implements IUnstakeRequestBody {
   /** @inheritdoc */
-  accountAddress: string;
+  accountAddress: string
   /** @inheritdoc */
-  tokenAmount: string;
+  tokenAmount: string
   /** @inheritdoc */
-  tokenAddress: string;
+  tokenAddress: string
 
   /**
    * Constructs a new instance of the UnstakeRequestBody class.
    * @param params - The {@link IUnstakeRequestBody} parameters for unstaking.
    */
   constructor({ accountAddress, tokenAmount, tokenAddress }: IUnstakeRequestBody) {
-    this.accountAddress = accountAddress;
-    this.tokenAmount = tokenAmount;
-    this.tokenAddress = tokenAddress;
+    this.accountAddress = accountAddress
+    this.tokenAmount = tokenAmount
+    this.tokenAddress = tokenAddress
   }
 
   /**
@@ -38,7 +38,7 @@ export class UnstakeRequestBody implements IUnstakeRequestBody {
    * @returns A new instance of the UnstakeRequestBody class.
    */
   static fromJson(json: any): UnstakeRequestBody {
-    return new UnstakeRequestBody(json);
+    return new UnstakeRequestBody(json)
   }
 
   /**
@@ -50,7 +50,7 @@ export class UnstakeRequestBody implements IUnstakeRequestBody {
       accountAddress: this.accountAddress,
       tokenAmount: this.tokenAmount,
       tokenAddress: this.tokenAddress,
-    };
+    }
   }
 }
 
@@ -59,9 +59,9 @@ export class UnstakeRequestBody implements IUnstakeRequestBody {
  */
 export interface IUnstakeResponseBody {
   /** The smart contract address. */
-  contractAddress: string;
+  contractAddress: string
   /** The encoded ABI (Application Binary Interface). */
-  encodedABI: string;
+  encodedABI: string
 }
 
 /**
@@ -70,17 +70,17 @@ export interface IUnstakeResponseBody {
  */
 export class UnstakeResponseBody implements IUnstakeResponseBody {
   /** @inheritdoc */
-  contractAddress: string;
+  contractAddress: string
   /** @inheritdoc */
-  encodedABI: string;
+  encodedABI: string
 
   /**
    * Constructs a new instance of the UnstakeResponseBody class.
    * @param params - The {@link IUnstakeResponseBody} parameters for the response body.
    */
   constructor({ contractAddress, encodedABI }: IUnstakeResponseBody) {
-    this.contractAddress = contractAddress;
-    this.encodedABI = encodedABI;
+    this.contractAddress = contractAddress
+    this.encodedABI = encodedABI
   }
 
   /**
@@ -89,7 +89,7 @@ export class UnstakeResponseBody implements IUnstakeResponseBody {
    * @returns A new UnstakeResponseBody instance.
    */
   static fromJson(json: any): UnstakeResponseBody {
-    return new UnstakeResponseBody(json);
+    return new UnstakeResponseBody(json)
   }
 
   /**
@@ -100,6 +100,6 @@ export class UnstakeResponseBody implements IUnstakeResponseBody {
     return {
       contractAddress: this.contractAddress,
       encodedABI: this.encodedABI,
-    };
+    }
   }
 }

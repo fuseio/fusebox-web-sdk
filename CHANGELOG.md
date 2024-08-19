@@ -1,3 +1,8 @@
+## [0.3.8]
+
+### Fixed
+- Fixed the `getTokenList` method.
+
 ## [0.3.6]
 
 ### Added

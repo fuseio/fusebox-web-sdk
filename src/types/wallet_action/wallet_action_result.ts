@@ -1,22 +1,22 @@
-import { WalletAction } from '.';
+import { WalletAction } from '.'
 
 /**
  * Represents the result of an action performed on the blockchain.
- * 
+ *
  * This class provides details about the pagination and the list of actions
  * performed on the blockchain.
  */
 export class WalletActionResult {
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-  nextPage?: number;
-  prevPage?: number;
-  page?: number;
-  totalDocs: number;
-  limit: number;
-  totalPages: number;
-  pagingCounter: number;
-  actions: WalletAction[];
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  nextPage?: number
+  prevPage?: number
+  page?: number
+  totalDocs: number
+  limit: number
+  totalPages: number
+  pagingCounter: number
+  actions: WalletAction[]
 
   /**
    * Constructs a `WalletActionResult` instance.
@@ -43,27 +43,27 @@ export class WalletActionResult {
     pagingCounter,
     actions,
   }: {
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-    nextPage?: number;
-    prevPage?: number;
-    page?: number;
-    totalDocs: number;
-    limit: number;
-    totalPages: number;
-    pagingCounter: number;
-    actions: WalletAction[];
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    nextPage?: number
+    prevPage?: number
+    page?: number
+    totalDocs: number
+    limit: number
+    totalPages: number
+    pagingCounter: number
+    actions: WalletAction[]
   }) {
-    this.hasNextPage = hasNextPage;
-    this.hasPrevPage = hasPrevPage;
-    this.nextPage = nextPage;
-    this.prevPage = prevPage;
-    this.page = page;
-    this.totalDocs = totalDocs;
-    this.limit = limit;
-    this.totalPages = totalPages;
-    this.pagingCounter = pagingCounter;
-    this.actions = actions;
+    this.hasNextPage = hasNextPage
+    this.hasPrevPage = hasPrevPage
+    this.nextPage = nextPage
+    this.prevPage = prevPage
+    this.page = page
+    this.totalDocs = totalDocs
+    this.limit = limit
+    this.totalPages = totalPages
+    this.pagingCounter = pagingCounter
+    this.actions = actions
   }
 
   /**
@@ -83,7 +83,7 @@ export class WalletActionResult {
       totalPages: json.totalPages,
       pagingCounter: json.pagingCounter,
       actions: WalletActionsConverter.fromJson(json.docs),
-    });
+    })
   }
 }
 
@@ -97,7 +97,7 @@ export class WalletActionsConverter {
    * @returns Array of `WalletAction` instances.
    */
   static fromJson(json: any[]): WalletAction[] {
-    return json.map((item) => WalletAction.fromJson(item));
+    return json.map((item) => WalletAction.fromJson(item))
   }
 
   /**
@@ -106,6 +106,6 @@ export class WalletActionsConverter {
    * @returns JSON array representing the wallet actions.
    */
   static toJson(actions: WalletAction[]): any[] {
-    return actions.map((action) => action.toJson());
+    return actions.map((action) => action.toJson())
   }
 }

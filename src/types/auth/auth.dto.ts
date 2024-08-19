@@ -3,10 +3,10 @@
  * Use `AuthDto.fromJson` to create an instance from a JSON object.
  */
 export class AuthDto {
-  ownerAddress: string;
-  smartWalletAddress?: string;
-  signature: string;
-  hash: string;
+  ownerAddress: string
+  smartWalletAddress?: string
+  signature: string
+  hash: string
 
   /**
    * Creates an instance of AuthDto.
@@ -16,10 +16,10 @@ export class AuthDto {
    * @param smartWalletAddress - The smart wallet address (optional).
    */
   constructor(ownerAddress: string, signature: string, hash: string, smartWalletAddress?: string) {
-    this.ownerAddress = ownerAddress;
-    this.signature = signature;
-    this.hash = hash;
-    this.smartWalletAddress = smartWalletAddress;
+    this.ownerAddress = ownerAddress
+    this.signature = signature
+    this.hash = hash
+    this.smartWalletAddress = smartWalletAddress
   }
 
   /**
@@ -32,7 +32,7 @@ export class AuthDto {
       smartWalletAddress: this.smartWalletAddress,
       signature: this.signature,
       hash: this.hash,
-    };
+    }
   }
 
   /**
@@ -46,6 +46,6 @@ export class AuthDto {
       json.signature as string,
       json.hash as string,
       json.smartWalletAddress as string
-    );
+    )
   }
 }
