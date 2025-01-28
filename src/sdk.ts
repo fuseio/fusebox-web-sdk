@@ -122,6 +122,7 @@ export class FuseSDK {
           paymasterContext,
           opts,
           clientOpts,
+          jwtToken,
           signature,
           baseUrl,
         }
@@ -129,12 +130,6 @@ export class FuseSDK {
     } else {
       const pimlico = new Pimlico(credentials, FuseSDK._getPimlicoUrl(publicApiKey, baseUrl), withPaymaster, isTestnet)
       fuseSDK.client = await pimlico.smartAccountClient()
-    }
-
-    if (jwtToken) {
-      fuseSDK._jwtToken = jwtToken
-    } else {
-      await fuseSDK.authenticate(credentials)
     }
 
     return fuseSDK
@@ -293,10 +288,7 @@ export class FuseSDK {
    * @param credentials are the private key credentials.
    * @returns JWT token upon successful authentication.
    */
-  async authenticate(credentials: EOASigner | Account): Promise<string> {
-    if (!isEOASigner(credentials)) {
-      throw new Error("Credentials must be an instance of ethers EOASigner")
-    }
+  async authenticate(credentials: EOASigner): Promise<string> {
     const auth = await SmartWalletAuth.signer(credentials, this.wallet.getSender())
     const response = await this._axios.post('/v2/smart-wallets/auth', auth.toJson())
     this._jwtToken = response.data.jwt
@@ -319,6 +311,7 @@ export class FuseSDK {
       paymasterContext,
       opts,
       clientOpts,
+      jwtToken,
       signature,
       baseUrl = Variables.BASE_URL,
     }: {
@@ -326,6 +319,7 @@ export class FuseSDK {
       paymasterContext?: Record<string, unknown>
       opts?: IPresetBuilderOpts
       clientOpts?: IClientOpts
+      jwtToken?: string
       signature?: string
       baseUrl?: string
     } = {}
@@ -339,7 +333,7 @@ export class FuseSDK {
       ...clientOpts,
     })
 
-    return this.wallet = await EtherspotWallet.init(
+    this.wallet = await EtherspotWallet.init(
       credentials,
       FuseSDK._getBundlerRpc(publicApiKey, baseUrl),
       {
@@ -352,6 +346,15 @@ export class FuseSDK {
       },
       signature
     )
+
+
+    if (jwtToken) {
+      this._jwtToken = jwtToken
+    } else {
+      await this.authenticate(credentials)
+    }
+
+    return this.wallet
   }
 
   /**
