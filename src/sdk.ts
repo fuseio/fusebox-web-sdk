@@ -25,6 +25,7 @@ import {
   TradeModule,
 } from './modules'
 import {
+  BundlerProvider,
   DefaultTxOptions,
   type ERC20,
   Native,
@@ -128,7 +129,7 @@ export class FuseSDK {
         }
       )
     } else {
-      const pimlico = new Pimlico(credentials, FuseSDK._getPimlicoUrl(publicApiKey, baseUrl), withPaymaster, isTestnet)
+      const pimlico = new Pimlico(credentials, FuseSDK._getBundlerRpc(publicApiKey, baseUrl, BundlerProvider.Pimlico), withPaymaster, isTestnet)
       fuseSDK.client = await pimlico.smartAccountClient()
     }
 
@@ -362,8 +363,8 @@ export class FuseSDK {
    * @param publicApiKey is required to authenticate with the Fuse API.
    * @returns
    */
-  private static _getBundlerRpc(publicApiKey: string, baseUrl: string): string {
-    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`
+  private static _getBundlerRpc(publicApiKey: string, baseUrl: string, provider: BundlerProvider = BundlerProvider.Etherspot): string {
+    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}&provider=${provider}`
   }
 
   /**
@@ -381,15 +382,6 @@ export class FuseSDK {
       `https://${baseUrl}/api/v0/paymaster?apiKey=${publicApiKey}`,
       paymasterContext ?? {}
     )
-  }
-
-  /**
-   * Retrieves the Pimlico bundler and paymaster URL for the provided publicApiKey
-   * @param publicApiKey is required to authenticate with the Fuse API.
-   * @returns
-   */
-  private static _getPimlicoUrl(publicApiKey: string, baseUrl: string): string {
-    return `https://${baseUrl}/api/v0/pimlico?apiKey=${publicApiKey}`
   }
 
   /**
