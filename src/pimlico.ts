@@ -1,18 +1,19 @@
-import { Account, Chain, createPublicClient, http } from "viem";
+import { Chain, createPublicClient, http } from "viem";
 import { fuse, fuseSparknet } from 'viem/chains'
 import { entryPoint07Address } from "viem/account-abstraction"
 import { createSmartAccountClient } from "permissionless"
 import { createPimlicoClient } from "permissionless/clients/pimlico"
 import { toSafeSmartAccount } from "permissionless/accounts"
+import { Owner } from "./types";
 
 export class Pimlico {
-  private _account: Account
+  private _owner: Owner
   private _pimlicoUrl: string
   private _isPaymaster?: boolean
   private _chain: Chain
 
-  constructor(account: Account, pimlicoUrl: string, isPaymaster?: boolean, isTestnet?: boolean) {
-    this._account = account
+  constructor(owner: Owner, pimlicoUrl: string, isPaymaster?: boolean, isTestnet?: boolean) {
+    this._owner = owner
     this._pimlicoUrl = pimlicoUrl
     this._chain = isTestnet ? fuseSparknet : fuse
     this._isPaymaster = isPaymaster
@@ -38,7 +39,7 @@ export class Pimlico {
   private _smartAccount() {
     return toSafeSmartAccount({
       client: this._publicClient(),
-      owners: [this._account],
+      owners: [this._owner],
       entryPoint: {
         address: entryPoint07Address,
         version: "0.7"

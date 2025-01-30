@@ -12,7 +12,6 @@ import {
   type UserOperationMiddlewareFn,
 } from 'userop'
 import { verifyingPaymaster } from 'userop/dist/preset/middleware'
-import { Account } from 'viem'
 import { SmartAccountClient } from 'permissionless'
 
 import Variables from './constants/variables'
@@ -29,6 +28,7 @@ import {
   DefaultTxOptions,
   type ERC20,
   Native,
+  Owner,
   type TradeRequest,
   type UnstakeRequestBody,
   WalletActionResult,
@@ -91,7 +91,7 @@ export class FuseSDK {
    */
   static async init(
     publicApiKey: string,
-    credentials: EOASigner | Account,
+    credentials: EOASigner | Owner,
     {
       withPaymaster,
       paymasterContext,
