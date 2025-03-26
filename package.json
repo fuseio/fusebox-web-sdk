@@ -22,13 +22,16 @@
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@typechain/ethers-v5": "^11.1.2",
-    "@types/node": "^22.4.1",
+    "@types/node": "^22.10.10",
+    "tslib": "^2.8.1",
     "typechain": "^8.3.2",
-    "typescript": "~5.2.2"
+    "typescript": "^5.7.3"
   },
   "dependencies": {
-    "axios": "^1.7.4",
+    "axios": "^1.7.9",
     "ethers": "^5.7.2",
-    "userop": "^0.3.8"
+    "permissionless": "^0.2.28",
+    "userop": "^0.3.8",
+    "viem": "^2.22.14"
   }
 }
