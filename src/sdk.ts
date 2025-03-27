@@ -12,6 +12,8 @@ import {
   type UserOperationMiddlewareFn,
 } from 'userop'
 import { verifyingPaymaster } from 'userop/dist/preset/middleware'
+import { SmartAccountClient } from 'permissionless'
+
 import Variables from './constants/variables'
 import { EtherspotWallet } from './etherspot'
 import {
@@ -22,25 +24,29 @@ import {
   TradeModule,
 } from './modules'
 import {
+  BundlerProvider,
   DefaultTxOptions,
   type ERC20,
   Native,
+  Owner,
   type TradeRequest,
   type UnstakeRequestBody,
   WalletActionResult,
+  isEOASigner,
   parseTokenDetails,
 } from './types'
 import type { StakeRequestBody } from './types/staking/stake'
 import { SmartWalletAuth } from './utils/auth'
 import { ContractUtils } from './utils/contracts'
 import { NonceManager } from './utils/nonceManager'
+import { Pimlico } from './pimlico'
 
 export class FuseSDK {
   private readonly _axios: AxiosInstance
   private readonly _feeTooLowError = 'fee too low'
   private _jwtToken!: string
   public wallet!: EtherspotWallet
-  public client!: Client
+  public client!: Client | SmartAccountClient
   public tradeModule!: TradeModule
   public explorerModule!: ExplorerModule
   public stakingModule!: StakingModule
@@ -85,7 +91,7 @@ export class FuseSDK {
    */
   static async init(
     publicApiKey: string,
-    credentials: EOASigner,
+    credentials: EOASigner | Owner,
     {
       withPaymaster,
       paymasterContext,
@@ -94,6 +100,7 @@ export class FuseSDK {
       jwtToken,
       signature,
       baseUrl = Variables.BASE_URL,
+      isTestnet = false
     }: {
       withPaymaster?: boolean
       paymasterContext?: Record<string, unknown>
@@ -102,34 +109,30 @@ export class FuseSDK {
       jwtToken?: string
       signature?: string
       baseUrl?: string
+      isTestnet?: boolean
     } = {}
   ): Promise<FuseSDK> {
     const fuseSDK = new FuseSDK(publicApiKey, baseUrl)
 
-    let paymasterMiddleware
-
-    if (withPaymaster) {
-      paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, baseUrl, paymasterContext)
-    }
-
-    fuseSDK.wallet = await FuseSDK._initializeWallet(
-      credentials,
-      publicApiKey,
-      baseUrl,
-      opts,
-      paymasterMiddleware,
-      signature
-    )
-
-    if (jwtToken) {
-      fuseSDK._jwtToken = jwtToken
+    if (isEOASigner(credentials)) {
+      await fuseSDK._initializeEtherspotWallet(
+        publicApiKey,
+        credentials,
+        {
+          withPaymaster,
+          paymasterContext,
+          opts,
+          clientOpts,
+          jwtToken,
+          signature,
+          baseUrl,
+        }
+      )
     } else {
-      await fuseSDK.authenticate(credentials)
+      const pimlico = new Pimlico(credentials, FuseSDK._getBundlerRpc(publicApiKey, baseUrl, BundlerProvider.Pimlico), withPaymaster, isTestnet)
+      fuseSDK.client = await pimlico.smartAccountClient()
     }
 
-    fuseSDK.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey, baseUrl), {
-      ...clientOpts,
-    })
     return fuseSDK
   }
 
@@ -152,7 +155,7 @@ export class FuseSDK {
 
     try {
       const userOp = this.wallet.executeBatch(calls)
-      return await this.client.sendUserOperation(userOp)
+      return await (this.client as Client).sendUserOperation(userOp)
     } catch (e: any) {
       if (txOptions.withRetry && e.message.includes(this._feeTooLowError)) {
         // Use eip1559 as soon as it's available on Fuse
@@ -163,7 +166,7 @@ export class FuseSDK {
         )
         this.setWalletFees(increasedFees)
         const userOp = this.wallet.executeBatch(calls)
-        return await this.client.sendUserOperation(userOp)
+        return await (this.client as Client).sendUserOperation(userOp)
       } else {
         throw e
       }
@@ -301,15 +304,37 @@ export class FuseSDK {
    * @param paymasterMiddleware is the middleware for the paymaster.
    * @returns
    */
-  private static async _initializeWallet(
-    credentials: EOASigner,
+  private async _initializeEtherspotWallet(
     publicApiKey: string,
-    baseUrl: string,
-    opts?: IPresetBuilderOpts,
-    paymasterMiddleware?: UserOperationMiddlewareFn,
-    signature?: string
+    credentials: EOASigner,
+    {
+      withPaymaster,
+      paymasterContext,
+      opts,
+      clientOpts,
+      jwtToken,
+      signature,
+      baseUrl = Variables.BASE_URL,
+    }: {
+      withPaymaster?: boolean
+      paymasterContext?: Record<string, unknown>
+      opts?: IPresetBuilderOpts
+      clientOpts?: IClientOpts
+      jwtToken?: string
+      signature?: string
+      baseUrl?: string
+    } = {}
   ): Promise<EtherspotWallet> {
-    return EtherspotWallet.init(
+    let paymasterMiddleware: UserOperationMiddlewareFn | undefined
+    if (withPaymaster) {
+      paymasterMiddleware = FuseSDK._getPaymasterMiddleware(publicApiKey, baseUrl, paymasterContext)
+    }
+
+    this.client = await Client.init(FuseSDK._getBundlerRpc(publicApiKey, baseUrl), {
+      ...clientOpts,
+    })
+
+    this.wallet = await EtherspotWallet.init(
       credentials,
       FuseSDK._getBundlerRpc(publicApiKey, baseUrl),
       {
@@ -322,6 +347,15 @@ export class FuseSDK {
       },
       signature
     )
+
+
+    if (jwtToken) {
+      this._jwtToken = jwtToken
+    } else {
+      await this.authenticate(credentials)
+    }
+
+    return this.wallet
   }
 
   /**
@@ -329,8 +363,8 @@ export class FuseSDK {
    * @param publicApiKey is required to authenticate with the Fuse API.
    * @returns
    */
-  private static _getBundlerRpc(publicApiKey: string, baseUrl: string): string {
-    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}`
+  private static _getBundlerRpc(publicApiKey: string, baseUrl: string, provider: BundlerProvider = BundlerProvider.Etherspot): string {
+    return `https://${baseUrl}/api/v0/bundler?apiKey=${publicApiKey}&provider=${provider}`
   }
 
   /**
@@ -382,7 +416,7 @@ export class FuseSDK {
 
     try {
       const userOp = this.wallet.execute(call.to, call.value, call.data)
-      return await this.client.sendUserOperation(userOp)
+      return await (this.client as Client).sendUserOperation(userOp)
     } catch (e: any) {
       if (e.message.includes(this._feeTooLowError) && txOptions.withRetry) {
         // Use eip1559 as soon as it's available on Fuse
@@ -393,7 +427,7 @@ export class FuseSDK {
         )
         this.setWalletFees(increasedFees)
         const userOp = this.wallet.execute(call.to, call.value, call.data)
-        return await this.client.sendUserOperation(userOp)
+        return await (this.client as Client).sendUserOperation(userOp)
       } else {
         throw e
       }

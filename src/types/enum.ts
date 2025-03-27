@@ -3,3 +3,8 @@ export enum TimeFrame {
   Month = 'month',
   Year = 'year',
 }
+
+export enum BundlerProvider {
+  Etherspot = "etherspot",
+  Pimlico = "pimlico",
+}
